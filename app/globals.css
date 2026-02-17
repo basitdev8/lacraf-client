@@ -2,25 +2,176 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #0a0a0a;
+  --brand: #f5c518;
+  --brand-dark: #d4a90e;
+  --muted: #8a8a8a;
+  --border: #e0e0e0;
+  --border-dark: #1a1a1a;
+  --error: #dc2626;
+  --success: #16a34a;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-brand: var(--brand);
+  --color-brand-dark: var(--brand-dark);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-border-dark: var(--border-dark);
+  --color-error: var(--error);
+  --color-success: var(--success);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-serif: var(--font-playfair);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Underline inputs */
+.input-underline {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  padding: 0.75rem 0;
+  font-size: 0.9375rem;
+  color: var(--foreground);
+  background: transparent;
+  transition: border-color 0.2s;
+}
+
+.input-underline::placeholder {
+  color: var(--muted);
+  font-weight: 300;
+}
+
+.input-underline:focus {
+  outline: none;
+  border-bottom-color: var(--foreground);
+  box-shadow: none;
+}
+
+/* Textarea underline variant */
+.textarea-underline {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  padding: 0.75rem 0;
+  font-size: 0.9375rem;
+  color: var(--foreground);
+  background: transparent;
+  resize: none;
+  transition: border-color 0.2s;
+}
+
+.textarea-underline::placeholder {
+  color: var(--muted);
+  font-weight: 300;
+}
+
+.textarea-underline:focus {
+  outline: none;
+  border-bottom-color: var(--foreground);
+  box-shadow: none;
+}
+
+/* Select underline */
+.select-underline {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  padding: 0.75rem 0;
+  font-size: 0.9375rem;
+  color: var(--foreground);
+  background: transparent;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a8a8a' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0 center;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.select-underline:focus {
+  outline: none;
+  border-bottom-color: var(--foreground);
+  box-shadow: none;
+}
+
+/* Button styles */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem 2.5rem;
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--foreground);
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary:hover {
+  background: var(--foreground);
+  color: white;
+  border-color: var(--foreground);
+}
+
+.btn-primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-dark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem 2.5rem;
+  border: 1px solid var(--foreground);
+  border-radius: 9999px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: white;
+  background: var(--foreground);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-dark:hover {
+  opacity: 0.85;
+}
+
+.btn-dark:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.75rem;
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--foreground);
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-outline:hover {
+  border-color: var(--foreground);
 }
