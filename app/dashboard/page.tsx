@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useAuth } from "@/context/auth-context";
 import { api } from "@/lib/api";
 import type { Shop, KycStatus } from "@/lib/types";
@@ -88,7 +89,7 @@ export default function DashboardPage() {
                 setting up to start selling on LaCraf.
               </p>
             </div>
-            <a href="/onboarding" className="btn-brand shrink-0 text-sm">
+            <Link href="/onboarding" className="btn-brand shrink-0 text-sm">
               Continue setup
               <svg
                 className="h-4 w-4"
@@ -103,7 +104,7 @@ export default function DashboardPage() {
                   d="M13 7l5 5m0 0l-5 5m5-5H6"
                 />
               </svg>
-            </a>
+            </Link>
           </div>
 
           {/* Progress bar */}
@@ -175,12 +176,12 @@ export default function DashboardPage() {
                 <p className="mt-0.5 text-xs text-muted">{step.desc}</p>
 
                 {!step.done && step.href && (
-                  <a
+                  <Link
                     href={step.href}
                     className="mt-3 inline-block text-xs font-medium text-brand-dark underline underline-offset-2"
                   >
                     Complete now →
-                  </a>
+                  </Link>
                 )}
                 {step.done && (
                   <p className="mt-3 text-xs font-medium text-success">
@@ -201,12 +202,12 @@ export default function DashboardPage() {
             <div className="rounded-2xl border border-border bg-white p-6">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="font-semibold">Your Shop</h2>
-                <a
+                <Link
                   href="/onboarding"
                   className="text-xs text-brand-dark underline underline-offset-2"
                 >
                   Edit
-                </a>
+                </Link>
               </div>
               <p className="text-lg font-medium">{shop.shopName}</p>
               <p className="mt-1 text-sm text-muted">{shop.address}</p>
@@ -237,9 +238,9 @@ export default function DashboardPage() {
               <p className="mt-1 text-sm text-muted">
                 Add your shop name, address and craft story.
               </p>
-              <a href="/onboarding" className="btn-brand mt-4 inline-flex">
+              <Link href="/onboarding" className="btn-brand mt-4 inline-flex">
                 Set up shop
-              </a>
+              </Link>
             </div>
           )}
 
@@ -300,9 +301,9 @@ export default function DashboardPage() {
                         </p>
                       </div>
                     )}
-                    <a href="/onboarding" className="btn-brand inline-flex">
+                    <Link href="/onboarding" className="btn-brand inline-flex">
                       Re-upload Documents
-                    </a>
+                    </Link>
                   </>
                 )}
 
@@ -352,9 +353,9 @@ export default function DashboardPage() {
                   Upload your identity documents to get verified.
                 </p>
                 {shop && (
-                  <a href="/onboarding" className="btn-brand mt-4 inline-flex">
+                  <Link href="/onboarding" className="btn-brand mt-4 inline-flex">
                     Upload Documents
-                  </a>
+                  </Link>
                 )}
                 {!shop && (
                   <p className="mt-3 text-xs text-muted">

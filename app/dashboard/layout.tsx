@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 
@@ -39,18 +40,18 @@ export default function DashboardLayout({
           <span className="font-serif text-xl font-bold italic">LaCraf</span>
 
           <nav className="hidden items-center gap-8 sm:flex">
-            <a
+            <Link
               href="/dashboard"
               className="text-sm font-medium text-foreground"
             >
               Dashboard
-            </a>
-            <a
+            </Link>
+            <Link
               href="/onboarding"
               className="text-sm text-muted transition-colors hover:text-foreground"
             >
               Complete Setup
-            </a>
+            </Link>
           </nav>
 
           <div className="flex items-center gap-4">
