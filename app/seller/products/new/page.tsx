@@ -311,27 +311,35 @@ function DetailsStep({
 
     setSaving(true);
     try {
-      let product: Product;
+      let productId: string;
       if (form.productId) {
-        // Update existing draft
-        product = await api.patch<Product>(`/products/${form.productId}`, {
+        // Update existing draft — keep the same id
+        await api.patch(`/products/${form.productId}`, {
           title: title.trim(),
           description: description.trim(),
           categoryId: form.categoryId,
           subcategoryId: form.subcategoryId,
           attributes,
         });
+        productId = form.productId;
       } else {
-        // Create new draft
-        product = await api.post<Product>("/products", {
-          title: title.trim(),
-          description: description.trim(),
-          categoryId: form.categoryId,
-          subcategoryId: form.subcategoryId,
-          attributes,
-        });
+        // Create new draft — response shape: { message, product: { id, ... } }
+        const result = await api.post<{ message: string; product: Product }>(
+          "/products",
+          {
+            title: title.trim(),
+            description: description.trim(),
+            categoryId: form.categoryId,
+            subcategoryId: form.subcategoryId,
+            attributes,
+          }
+        );
+        productId = result.product.id;
       }
-      onNext({ title: title.trim(), description: description.trim(), attributes }, product.id);
+      onNext(
+        { title: title.trim(), description: description.trim(), attributes },
+        productId
+      );
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to save product.");
     } finally {
