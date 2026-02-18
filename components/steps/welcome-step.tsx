@@ -8,15 +8,20 @@ export function WelcomeStep({ onBegin }: WelcomeStepProps) {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-6 py-16">
       <div className="w-full max-w-xl text-center">
-        {/* Small brand tag */}
-        <span className="inline-block rounded-full border border-border px-4 py-1.5 text-[0.6875rem] font-medium uppercase tracking-widest text-muted">
+        {/* Brand tag with yellow accent */}
+        <span className="inline-block rounded-full border border-brand/40 bg-brand-light px-4 py-1.5 text-[0.6875rem] font-medium uppercase tracking-widest text-foreground">
           Artisan Onboarding
         </span>
 
         <h1 className="mt-7 font-serif text-4xl leading-tight sm:text-5xl">
           Share Your Craft
           <br />
-          <span className="italic text-muted">with the World</span>
+          <span className="italic">
+            with the{" "}
+            <span className="decoration-brand underline decoration-[3px] underline-offset-4">
+              World
+            </span>
+          </span>
         </h1>
 
         <p className="mx-auto mt-5 max-w-md text-[0.9375rem] leading-relaxed text-muted">
@@ -24,7 +29,7 @@ export function WelcomeStep({ onBegin }: WelcomeStepProps) {
           treasures to customers who appreciate authentic craftsmanship.
         </p>
 
-        {/* Steps preview */}
+        {/* Steps preview with yellow accents */}
         <div className="mx-auto mt-12 max-w-sm">
           <div className="space-y-0">
             {[
@@ -45,7 +50,7 @@ export function WelcomeStep({ onBegin }: WelcomeStepProps) {
               },
             ].map((item, i) => (
               <div key={i} className="group flex items-start gap-5 py-4">
-                <span className="mt-0.5 shrink-0 text-xs font-medium text-muted/60">
+                <span className="mt-4 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand/15 text-xs font-semibold text-foreground">
                   {item.num}
                 </span>
                 <div className="flex-1 border-t border-border pt-4 text-left">
@@ -60,7 +65,7 @@ export function WelcomeStep({ onBegin }: WelcomeStepProps) {
         </div>
 
         <div className="mt-12">
-          <button onClick={onBegin} className="btn-dark">
+          <button onClick={onBegin} className="btn-brand">
             Get Started
             <svg
               className="h-4 w-4"

@@ -26,15 +26,25 @@ export function StepIndicator({ currentStep }: StepIndicatorProps) {
               <div
                 className={`flex h-9 w-9 items-center justify-center rounded-full text-xs font-medium transition-all duration-300 ${
                   isCompleted
-                    ? "bg-foreground text-white"
+                    ? "bg-brand text-foreground"
                     : isCurrent
-                      ? "border-2 border-foreground text-foreground"
+                      ? "border-2 border-brand bg-brand-light text-foreground"
                       : "border border-border text-muted"
                 }`}
               >
                 {isCompleted ? (
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2.5}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M5 13l4 4L19 7"
+                    />
                   </svg>
                 ) : (
                   step.num
@@ -56,8 +66,8 @@ export function StepIndicator({ currentStep }: StepIndicatorProps) {
             {/* Connector line */}
             {i < STEPS.length - 1 && (
               <div
-                className={`mx-4 mb-6 h-[1px] w-16 sm:mx-8 sm:w-24 transition-colors duration-300 ${
-                  isCompleted ? "bg-foreground" : "bg-border"
+                className={`mx-4 mb-6 h-[2px] w-16 rounded-full sm:mx-8 sm:w-24 transition-colors duration-300 ${
+                  isCompleted ? "bg-brand" : "bg-border"
                 }`}
               />
             )}

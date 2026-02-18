@@ -66,6 +66,7 @@ export function KycStep({ onComplete, onBack }: KycStepProps) {
 
   const requiredDocs = DOCUMENTS.filter((d) => d.required);
   const allRequiredUploaded = requiredDocs.every((d) => files[d.key]);
+  const uploadedCount = requiredDocs.filter((d) => files[d.key]).length;
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -102,9 +103,23 @@ export function KycStep({ onComplete, onBack }: KycStepProps) {
             Upload Documents
           </h1>
           <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-muted">
-            Share your identity and business documents for verification.
-            We review within 72 hours. All documents are kept secure.
+            Share your identity and business documents for verification. We
+            review within 72 hours. All documents are kept secure.
           </p>
+          {/* Progress indicator */}
+          <div className="mx-auto mt-5 flex items-center justify-center gap-2">
+            <div className="h-1.5 w-24 overflow-hidden rounded-full bg-brand/15">
+              <div
+                className="h-full rounded-full bg-brand transition-all duration-500"
+                style={{
+                  width: `${(uploadedCount / requiredDocs.length) * 100}%`,
+                }}
+              />
+            </div>
+            <span className="text-xs font-medium text-muted">
+              {uploadedCount}/{requiredDocs.length}
+            </span>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="mt-10">
@@ -119,17 +134,17 @@ export function KycStep({ onComplete, onBack }: KycStepProps) {
                 return (
                   <label
                     key={doc.key}
-                    className={`group flex cursor-pointer items-center gap-4 rounded-xl border px-5 py-4 transition-all hover:border-foreground/30 ${
+                    className={`group flex cursor-pointer items-center gap-4 rounded-xl border px-5 py-4 transition-all hover:border-brand/50 ${
                       file
-                        ? "border-foreground/20 bg-[#fafafa]"
+                        ? "border-brand/30 bg-brand-light"
                         : "border-border"
                     }`}
                   >
                     <div
                       className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors ${
                         file
-                          ? "bg-foreground text-white"
-                          : "bg-[#f5f5f5] text-muted group-hover:bg-[#ebebeb]"
+                          ? "bg-brand text-foreground"
+                          : "bg-[#f5f5f5] text-muted group-hover:bg-brand-light group-hover:text-brand-dark"
                       }`}
                     >
                       {file ? (
@@ -193,17 +208,17 @@ export function KycStep({ onComplete, onBack }: KycStepProps) {
                 return (
                   <label
                     key={doc.key}
-                    className={`group flex cursor-pointer items-center gap-4 rounded-xl border px-5 py-4 transition-all hover:border-foreground/30 ${
+                    className={`group flex cursor-pointer items-center gap-4 rounded-xl border px-5 py-4 transition-all hover:border-brand/50 ${
                       file
-                        ? "border-foreground/20 bg-[#fafafa]"
+                        ? "border-brand/30 bg-brand-light"
                         : "border-border border-dashed"
                     }`}
                   >
                     <div
                       className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors ${
                         file
-                          ? "bg-foreground text-white"
-                          : "bg-[#f5f5f5] text-muted group-hover:bg-[#ebebeb]"
+                          ? "bg-brand text-foreground"
+                          : "bg-[#f5f5f5] text-muted group-hover:bg-brand-light group-hover:text-brand-dark"
                       }`}
                     >
                       {file ? (
@@ -274,7 +289,7 @@ export function KycStep({ onComplete, onBack }: KycStepProps) {
             <button
               type="submit"
               disabled={loading || !allRequiredUploaded}
-              className="btn-dark"
+              className="btn-brand"
             >
               {loading ? "Uploading..." : "Submit for Review"}
             </button>

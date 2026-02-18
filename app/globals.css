@@ -5,6 +5,7 @@
   --foreground: #0a0a0a;
   --brand: #f5c518;
   --brand-dark: #d4a90e;
+  --brand-light: #fef9e7;
   --muted: #8a8a8a;
   --border: #e0e0e0;
   --border-dark: #1a1a1a;
@@ -17,6 +18,7 @@
   --color-foreground: var(--foreground);
   --color-brand: var(--brand);
   --color-brand-dark: var(--brand-dark);
+  --color-brand-light: var(--brand-light);
   --color-muted: var(--muted);
   --color-border: var(--border);
   --color-border-dark: var(--border-dark);
@@ -52,7 +54,7 @@ body {
 
 .input-underline:focus {
   outline: none;
-  border-bottom-color: var(--foreground);
+  border-bottom-color: var(--brand);
   box-shadow: none;
 }
 
@@ -76,7 +78,7 @@ body {
 
 .textarea-underline:focus {
   outline: none;
-  border-bottom-color: var(--foreground);
+  border-bottom-color: var(--brand);
   box-shadow: none;
 }
 
@@ -99,8 +101,34 @@ body {
 
 .select-underline:focus {
   outline: none;
-  border-bottom-color: var(--foreground);
+  border-bottom-color: var(--brand);
   box-shadow: none;
+}
+
+/* Brand button — primary CTA with yellow */
+.btn-brand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem 2.5rem;
+  border: none;
+  border-radius: 9999px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--foreground);
+  background: var(--brand);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-brand:hover {
+  background: var(--brand-dark);
+}
+
+.btn-brand:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 /* Button styles */

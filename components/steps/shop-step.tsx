@@ -48,7 +48,10 @@ export function ShopStep({ artisanName, onComplete }: ShopStepProps) {
 
         <div className="text-center">
           <h1 className="text-2xl font-semibold sm:text-3xl">
-            Welcome, {firstName}
+            Welcome,{" "}
+            <span className="decoration-brand underline decoration-[3px] underline-offset-4">
+              {firstName}
+            </span>
           </h1>
           <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-muted">
             Tell us about your craft business. You can always update these
@@ -112,7 +115,7 @@ export function ShopStep({ artisanName, onComplete }: ShopStepProps) {
                 }
               />
               {form.description.length > 0 && form.description.length < 50 && (
-                <p className="mt-1 text-xs text-muted">
+                <p className="mt-1 text-xs text-brand-dark">
                   {50 - form.description.length} more characters needed
                 </p>
               )}
@@ -126,7 +129,7 @@ export function ShopStep({ artisanName, onComplete }: ShopStepProps) {
           )}
 
           <div className="mt-10 flex justify-center">
-            <button type="submit" disabled={loading} className="btn-dark">
+            <button type="submit" disabled={loading} className="btn-brand">
               {loading ? "Setting up..." : "Continue"}
               {!loading && (
                 <svg

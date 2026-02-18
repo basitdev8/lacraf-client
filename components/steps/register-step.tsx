@@ -112,10 +112,11 @@ export function RegisterStep({ onComplete }: RegisterStepProps) {
 
   return (
     <div className="flex min-h-screen">
-      {/* Left branding panel — hidden on mobile */}
-      <div className="hidden w-[40%] flex-col justify-between bg-[#fafafa] p-12 lg:flex">
+      {/* Left branding panel with brand yellow accent */}
+      <div className="hidden w-[40%] flex-col justify-between bg-brand-light p-12 lg:flex">
         <div>
           <p className="text-sm font-semibold tracking-wide">LaCraf</p>
+          <div className="mt-1 h-[3px] w-6 rounded-full bg-brand" />
         </div>
         <div>
           <h2 className="font-serif text-3xl leading-snug">
@@ -124,9 +125,14 @@ export function RegisterStep({ onComplete }: RegisterStepProps) {
             tells a story.
           </h2>
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted">
-            Join hundreds of artisans already sharing their
-            craft with customers who value authenticity.
+            Join hundreds of artisans already sharing their craft with customers
+            who value authenticity.
           </p>
+          <div className="mt-8 flex gap-2">
+            <div className="h-1.5 w-8 rounded-full bg-brand" />
+            <div className="h-1.5 w-1.5 rounded-full bg-brand/40" />
+            <div className="h-1.5 w-1.5 rounded-full bg-brand/40" />
+          </div>
         </div>
         <p className="text-xs text-muted">
           &copy; {new Date().getFullYear()} LaCraf
@@ -260,7 +266,7 @@ export function RegisterStep({ onComplete }: RegisterStepProps) {
                 type="checkbox"
                 checked={agreed}
                 onChange={(e) => setAgreed(e.target.checked)}
-                className="mt-0.5 h-4 w-4 cursor-pointer accent-foreground"
+                className="mt-0.5 h-4 w-4 cursor-pointer accent-brand"
               />
               <span className="text-xs leading-relaxed text-muted">
                 I agree to the{" "}
@@ -285,7 +291,11 @@ export function RegisterStep({ onComplete }: RegisterStepProps) {
               </p>
             )}
 
-            <button type="submit" disabled={loading} className="btn-dark w-full">
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-brand w-full"
+            >
               {loading ? "Creating account..." : "Create Account"}
             </button>
           </form>

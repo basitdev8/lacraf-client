@@ -87,10 +87,10 @@ export function VerifyStep({ email, onComplete }: VerifyStepProps) {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-6">
       <div className="w-full max-w-sm text-center">
-        {/* Mail icon */}
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-border">
+        {/* Mail icon with brand background */}
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-light">
           <svg
-            className="h-6 w-6 text-foreground"
+            className="h-7 w-7 text-brand-dark"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -110,8 +110,11 @@ export function VerifyStep({ email, onComplete }: VerifyStepProps) {
           <span className="font-medium text-foreground">{email}</span>
         </p>
 
-        {/* OTP inputs */}
-        <div className="mt-8 flex justify-center gap-2.5" onPaste={handlePaste}>
+        {/* OTP inputs with brand focus */}
+        <div
+          className="mt-8 flex justify-center gap-2.5"
+          onPaste={handlePaste}
+        >
           {otp.map((digit, i) => (
             <input
               key={i}
@@ -125,7 +128,7 @@ export function VerifyStep({ email, onComplete }: VerifyStepProps) {
               onChange={(e) => handleChange(i, e.target.value)}
               onKeyDown={(e) => handleKeyDown(i, e)}
               disabled={loading}
-              className="h-12 w-11 rounded-lg border border-border bg-transparent text-center text-lg font-semibold text-foreground transition-all focus:border-foreground focus:outline-none focus:ring-1 focus:ring-foreground disabled:opacity-50"
+              className="h-12 w-11 rounded-lg border border-border bg-transparent text-center text-lg font-semibold text-foreground transition-all focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 disabled:opacity-50"
             />
           ))}
         </div>
@@ -138,7 +141,7 @@ export function VerifyStep({ email, onComplete }: VerifyStepProps) {
 
         {loading && (
           <div className="mt-4 flex items-center justify-center gap-2 text-sm text-muted">
-            <div className="h-3.5 w-3.5 animate-spin rounded-full border border-border border-t-foreground" />
+            <div className="h-3.5 w-3.5 animate-spin rounded-full border border-brand/30 border-t-brand" />
             Verifying...
           </div>
         )}
@@ -154,7 +157,7 @@ export function VerifyStep({ email, onComplete }: VerifyStepProps) {
             >
               {resending ? "Sending..." : "Didn\u2019t get the code?"}{" "}
               {!resending && (
-                <span className="font-medium text-foreground underline underline-offset-2">
+                <span className="font-medium text-brand-dark underline underline-offset-2">
                   Resend
                 </span>
               )}

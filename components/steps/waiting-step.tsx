@@ -40,7 +40,7 @@ export function WaitingStep({ onApproved, onRejected }: WaitingStepProps) {
   if (loading) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-foreground" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand/30 border-t-brand" />
         <p className="mt-4 text-sm text-muted">Loading status...</p>
       </div>
     );
@@ -56,9 +56,9 @@ export function WaitingStep({ onApproved, onRejected }: WaitingStepProps) {
         {isRejected ? (
           <div className="mx-auto max-w-md text-center">
             {/* Warning icon */}
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border-2 border-error/20 bg-error/5">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-error/5">
               <svg
-                className="h-6 w-6 text-error"
+                className="h-7 w-7 text-error"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -81,8 +81,8 @@ export function WaitingStep({ onApproved, onRejected }: WaitingStepProps) {
             </p>
 
             {status?.rejectionReason && (
-              <div className="mx-auto mt-8 rounded-xl bg-[#fafafa] px-6 py-5 text-left">
-                <p className="text-[0.6875rem] font-medium uppercase tracking-wider text-muted">
+              <div className="mx-auto mt-8 rounded-xl border border-error/10 bg-error/5 px-6 py-5 text-left">
+                <p className="text-[0.6875rem] font-medium uppercase tracking-wider text-error/70">
                   Reviewer Note
                 </p>
                 <p className="mt-2 text-sm leading-relaxed">
@@ -92,7 +92,7 @@ export function WaitingStep({ onApproved, onRejected }: WaitingStepProps) {
             )}
 
             <div className="mt-8">
-              <button onClick={onRejected} className="btn-dark">
+              <button onClick={onRejected} className="btn-brand">
                 Re-upload Documents
                 <svg
                   className="h-4 w-4"
@@ -112,10 +112,10 @@ export function WaitingStep({ onApproved, onRejected }: WaitingStepProps) {
           </div>
         ) : (
           <div className="mx-auto max-w-md text-center">
-            {/* Success icon */}
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-border bg-[#fafafa]">
+            {/* Success icon with brand color */}
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-light">
               <svg
-                className="h-6 w-6 text-foreground"
+                className="h-7 w-7 text-brand-dark"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -134,12 +134,13 @@ export function WaitingStep({ onApproved, onRejected }: WaitingStepProps) {
             </h1>
             <p className="mt-3 text-sm leading-relaxed text-muted">
               Your application has been submitted successfully. Our team will
-              review your information and visit your workshop within 72 hours.
+              review your information and visit your workshop within{" "}
+              <span className="font-semibold text-foreground">72 hours</span>.
             </p>
 
             {/* What happens next */}
-            <div className="mt-10 rounded-xl bg-[#fafafa] px-6 py-6 text-left">
-              <p className="text-xs font-medium uppercase tracking-wider text-muted">
+            <div className="mt-10 rounded-xl border border-brand/15 bg-brand-light/50 px-6 py-6 text-left">
+              <p className="text-xs font-medium uppercase tracking-wider text-brand-dark">
                 What happens next
               </p>
               <div className="mt-4 space-y-3">
@@ -149,7 +150,7 @@ export function WaitingStep({ onApproved, onRejected }: WaitingStepProps) {
                   "Notifications on your LaCraf account",
                 ].map((item, i) => (
                   <div key={i} className="flex items-center gap-3">
-                    <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-foreground/5 text-xs font-medium text-muted">
+                    <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand/20 text-xs font-semibold text-foreground">
                       {i + 1}
                     </div>
                     <p className="text-sm text-foreground">{item}</p>
@@ -169,7 +170,7 @@ export function WaitingStep({ onApproved, onRejected }: WaitingStepProps) {
 
             <p className="mt-8 text-xs text-muted">
               Need help? Contact Seller Support at{" "}
-              <span className="font-medium text-foreground">
+              <span className="font-medium text-brand-dark">
                 1800-XXX-XXXX
               </span>
             </p>
