@@ -7,6 +7,7 @@ import { StepIndicator } from "@/components/step-indicator";
 interface KycStepProps {
   onComplete: () => void;
   onBack: () => void;
+  onSkip?: () => void;
 }
 
 interface DocField {
@@ -55,7 +56,7 @@ const DOCUMENTS: DocField[] = [
   },
 ];
 
-export function KycStep({ onComplete, onBack }: KycStepProps) {
+export function KycStep({ onComplete, onBack, onSkip }: KycStepProps) {
   const [files, setFiles] = useState<Record<string, File | null>>({});
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -282,17 +283,28 @@ export function KycStep({ onComplete, onBack }: KycStepProps) {
           )}
 
           {/* Actions */}
-          <div className="mt-10 flex items-center justify-center gap-3">
-            <button type="button" onClick={onBack} className="btn-outline">
-              Back
-            </button>
-            <button
-              type="submit"
-              disabled={loading || !allRequiredUploaded}
-              className="btn-brand"
-            >
-              {loading ? "Uploading..." : "Submit for Review"}
-            </button>
+          <div className="mt-10 flex flex-col items-center gap-4">
+            <div className="flex items-center gap-3">
+              <button type="button" onClick={onBack} className="btn-outline">
+                Back
+              </button>
+              <button
+                type="submit"
+                disabled={loading || !allRequiredUploaded}
+                className="btn-brand"
+              >
+                {loading ? "Uploading..." : "Submit for Review"}
+              </button>
+            </div>
+            {onSkip && (
+              <button
+                type="button"
+                onClick={onSkip}
+                className="text-sm text-muted transition-colors hover:text-foreground"
+              >
+                Skip for now, go to dashboard →
+              </button>
+            )}
           </div>
         </form>
       </div>

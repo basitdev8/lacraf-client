@@ -102,10 +102,8 @@ export default function OnboardingPage() {
         <VerifyStep
           email={email}
           onComplete={() => {
-            if (artisan) {
-              setArtisan({ ...artisan, emailVerified: true });
-            }
-            setStep("shop");
+            // Email verified but no token yet — redirect to login to get tokens
+            window.location.href = "/login?verified=true";
           }}
         />
       )}
@@ -114,6 +112,7 @@ export default function OnboardingPage() {
         <ShopStep
           artisanName={artisan?.fullName || "Artisan"}
           onComplete={() => setStep("kyc")}
+          onSkip={() => { window.location.href = "/dashboard"; }}
         />
       )}
 
@@ -121,6 +120,7 @@ export default function OnboardingPage() {
         <KycStep
           onComplete={() => setStep("waiting")}
           onBack={() => setStep("shop")}
+          onSkip={() => { window.location.href = "/dashboard"; }}
         />
       )}
 

@@ -161,10 +161,10 @@ export function WaitingStep({ onApproved, onRejected }: WaitingStepProps) {
 
             <div className="mt-8">
               <button
-                onClick={() => (window.location.href = "/")}
+                onClick={() => (window.location.href = "/dashboard")}
                 className="btn-outline"
               >
-                Return Home
+                Go to Dashboard
               </button>
             </div>
 

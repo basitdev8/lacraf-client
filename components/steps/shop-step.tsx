@@ -8,9 +8,10 @@ import { StepIndicator } from "@/components/step-indicator";
 interface ShopStepProps {
   artisanName: string;
   onComplete: () => void;
+  onSkip?: () => void;
 }
 
-export function ShopStep({ artisanName, onComplete }: ShopStepProps) {
+export function ShopStep({ artisanName, onComplete, onSkip }: ShopStepProps) {
   const [form, setForm] = useState({
     shopName: "",
     description: "",
@@ -128,7 +129,7 @@ export function ShopStep({ artisanName, onComplete }: ShopStepProps) {
             </p>
           )}
 
-          <div className="mt-10 flex justify-center">
+          <div className="mt-10 flex flex-col items-center gap-4">
             <button type="submit" disabled={loading} className="btn-brand">
               {loading ? "Setting up..." : "Continue"}
               {!loading && (
@@ -147,6 +148,15 @@ export function ShopStep({ artisanName, onComplete }: ShopStepProps) {
                 </svg>
               )}
             </button>
+            {onSkip && (
+              <button
+                type="button"
+                onClick={onSkip}
+                className="text-sm text-muted transition-colors hover:text-foreground"
+              >
+                Skip for now, go to dashboard →
+              </button>
+            )}
           </div>
         </form>
       </div>
