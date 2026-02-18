@@ -87,6 +87,32 @@ class ApiClient {
       body: JSON.stringify(body),
     });
   }
+
+  async delete<T>(endpoint: string): Promise<T> {
+    return this.request<T>(endpoint, { method: "DELETE" });
+  }
+
+  async getWithParams<T>(
+    endpoint: string,
+    params?: Record<string, string | number | undefined>
+  ): Promise<T> {
+    let url = endpoint;
+    if (params) {
+      const searchParams = new URLSearchParams();
+      Object.entries(params).forEach(([key, val]) => {
+        if (val !== undefined && String(val) !== "") {
+          searchParams.set(key, String(val));
+        }
+      });
+      const qs = searchParams.toString();
+      if (qs) url += `?${qs}`;
+    }
+    return this.request<T>(url, { method: "GET" });
+  }
+
+  async postForm<T>(endpoint: string, body: FormData): Promise<T> {
+    return this.request<T>(endpoint, { method: "POST", body });
+  }
 }
 
 export const api = new ApiClient();

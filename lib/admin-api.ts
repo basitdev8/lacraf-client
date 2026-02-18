@@ -68,6 +68,13 @@ class AdminApiClient {
     });
   }
 
+  async patch<T>(endpoint: string, body?: unknown): Promise<T> {
+    return this.request<T>(endpoint, {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    });
+  }
+
   async get<T>(
     endpoint: string,
     params?: Record<string, string | number | undefined>

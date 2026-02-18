@@ -81,3 +81,57 @@ export interface ReviewResponse {
   decision: "APPROVED" | "REJECTED";
   kycStatus: KycStatusValue;
 }
+
+// ─── Products (Admin) ──────────────────────────────────────────────────────────
+
+export type ProductStatus = "DRAFT" | "UNDER_REVIEW" | "APPROVED" | "REJECTED";
+
+export interface AdminProductListItem {
+  id: string;
+  title: string;
+  status: ProductStatus;
+  rejectionReason: string | null;
+  createdAt: string;
+  updatedAt: string;
+  category?: { id: string; name: string };
+  subcategory?: { id: string; name: string };
+  artisan?: {
+    id: string;
+    fullName: string;
+    email: string;
+  };
+  shop?: {
+    shopName: string;
+  };
+  images: { id: string; url: string; isDefault: boolean }[];
+  _count?: { variants: number };
+}
+
+export interface AdminProductDetail extends AdminProductListItem {
+  description: string;
+  attributes: { key: string; label: string; type: string; value: string }[];
+  variants: {
+    id: string;
+    label: string;
+    price: number;
+    stock: number;
+    isDefault: boolean;
+    attributes: { key: string; label: string; type: string; value: string }[];
+    images: { id: string; url: string; isDefault: boolean }[];
+  }[];
+}
+
+export interface AdminProductsListResponse {
+  products: AdminProductListItem[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface ProductReviewResponse {
+  message: string;
+  productId: string;
+  decision: "APPROVED" | "REJECTED";
+  status: ProductStatus;
+}

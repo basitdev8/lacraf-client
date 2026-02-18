@@ -46,12 +46,21 @@ export default function DashboardLayout({
             >
               Dashboard
             </Link>
-            <Link
-              href="/onboarding"
-              className="text-sm text-muted transition-colors hover:text-foreground"
-            >
-              Complete Setup
-            </Link>
+            {artisan.isApproved ? (
+              <Link
+                href="/seller"
+                className="text-sm text-muted transition-colors hover:text-foreground"
+              >
+                Seller Dashboard
+              </Link>
+            ) : (
+              <Link
+                href="/onboarding"
+                className="text-sm text-muted transition-colors hover:text-foreground"
+              >
+                Complete Setup
+              </Link>
+            )}
           </nav>
 
           <div className="flex items-center gap-4">

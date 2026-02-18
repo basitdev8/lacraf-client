@@ -78,8 +78,67 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      {/* Setup incomplete banner */}
-      {!isFullyOnboarded && (
+      {/* Banner — changes based on onboarding + approval status */}
+      {isFullyOnboarded ? (
+        /* ── APPROVED: Start Selling ── */
+        <div className="rounded-2xl border border-success/20 bg-success/5 px-6 py-5">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div className="mb-1 flex items-center gap-2">
+                <span className="inline-flex items-center rounded-full bg-success/10 px-2.5 py-0.5 text-xs font-semibold text-success">
+                  Approved
+                </span>
+              </div>
+              <h2 className="font-semibold">Your account is approved!</h2>
+              <p className="mt-1 text-sm text-muted">
+                You&apos;re all set — head to your seller dashboard to list
+                products and manage your shop.
+              </p>
+            </div>
+            <Link href="/seller" className="btn-brand shrink-0 text-sm">
+              Start Selling
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M13 7l5 5m0 0l-5 5m5-5H6"
+                />
+              </svg>
+            </Link>
+          </div>
+        </div>
+      ) : kycStatus?.status === "UNDER_REVIEW" ? (
+        /* ── KYC submitted, waiting for admin ── */
+        <div className="rounded-2xl border border-brand/25 bg-brand-light/70 px-6 py-5">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div className="mb-1 flex items-center gap-2">
+                <span className="inline-flex animate-pulse items-center rounded-full bg-brand px-2.5 py-0.5 text-xs font-semibold">
+                  Under Review
+                </span>
+              </div>
+              <h2 className="font-semibold">Application under review</h2>
+              <p className="mt-1 text-sm text-muted">
+                Our team is reviewing your documents. This typically takes up to
+                72 hours. We&apos;ll email you once a decision is made.
+              </p>
+            </div>
+            <div className="shrink-0 rounded-full border border-brand/30 bg-white px-5 py-3 text-sm font-medium text-muted">
+              Hang tight...
+            </div>
+          </div>
+          <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-brand/20">
+            <div className="h-full w-full rounded-full bg-brand/50 animate-pulse" />
+          </div>
+        </div>
+      ) : (
+        /* ── Setup incomplete ── */
         <div className="rounded-2xl border border-brand/25 bg-brand-light/70 px-6 py-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
@@ -106,8 +165,6 @@ export default function DashboardPage() {
               </svg>
             </Link>
           </div>
-
-          {/* Progress bar */}
           <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-brand/20">
             <div
               className="h-full rounded-full bg-brand transition-all duration-700"

@@ -3,12 +3,13 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useAdminAuth } from "@/context/admin-auth-context";
+import { useAuth } from "@/context/auth-context";
 
 const navItems = [
   {
-    label: "Dashboard",
-    href: "/admin/dashboard",
+    label: "Overview",
+    href: "/seller",
+    exact: true,
     icon: (
       <svg
         className="h-4 w-4 shrink-0"
@@ -26,27 +27,9 @@ const navItems = [
     ),
   },
   {
-    label: "Artisans",
-    href: "/admin/artisans",
-    icon: (
-      <svg
-        className="h-4 w-4 shrink-0"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth={1.75}
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
-        />
-      </svg>
-    ),
-  },
-  {
     label: "Products",
-    href: "/admin/products",
+    href: "/seller/products",
+    exact: false,
     icon: (
       <svg
         className="h-4 w-4 shrink-0"
@@ -63,24 +46,66 @@ const navItems = [
       </svg>
     ),
   },
+  {
+    label: "Orders",
+    href: "/seller/orders",
+    exact: false,
+    icon: (
+      <svg
+        className="h-4 w-4 shrink-0"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={1.75}
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+        />
+      </svg>
+    ),
+  },
+  {
+    label: "Profile",
+    href: "/seller/profile",
+    exact: false,
+    icon: (
+      <svg
+        className="h-4 w-4 shrink-0"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={1.75}
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+        />
+      </svg>
+    ),
+  },
 ];
 
-export default function AdminAppLayout({
+export default function SellerLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { admin, loading, logout } = useAdminAuth();
+  const { artisan, loading, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!loading && !admin) {
-      router.replace("/admin/login");
+    if (!loading && !artisan) {
+      router.replace("/login");
+    } else if (!loading && artisan && !artisan.isApproved) {
+      router.replace("/dashboard");
     }
-  }, [admin, loading, router]);
+  }, [artisan, loading, router]);
 
-  if (loading || !admin) {
+  if (loading || !artisan || !artisan.isApproved) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-foreground" />
@@ -90,32 +115,34 @@ export default function AdminAppLayout({
 
   const handleLogout = () => {
     logout();
-    router.replace("/admin/login");
+    router.replace("/login");
   };
+
+  const firstName = artisan.fullName.split(" ")[0];
 
   return (
     <div className="flex min-h-screen bg-[#f7f7f7]">
       {/* Sidebar */}
       <aside className="fixed left-0 top-0 flex h-screen w-60 flex-col border-r border-border bg-white">
         {/* Logo */}
-        <div className="flex h-[60px] items-center gap-2.5 border-b border-border px-5">
+        <div className="flex h-[60px] items-center justify-between border-b border-border px-5">
           <span className="font-serif text-lg font-bold italic">LaCraf</span>
           <span className="rounded-full bg-brand px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-foreground">
-            Admin
+            Seller
           </span>
         </div>
 
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto px-3 py-4">
           <p className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-widest text-muted">
-            Menu
+            Storefront
           </p>
           <ul className="space-y-0.5">
             {navItems.map((item) => {
-              const isActive =
-                pathname === item.href ||
-                (item.href !== "/admin/dashboard" &&
-                  pathname.startsWith(item.href));
+              const isActive = item.exact
+                ? pathname === item.href
+                : pathname === item.href ||
+                  pathname.startsWith(item.href + "/");
               return (
                 <li key={item.href}>
                   <Link
@@ -136,17 +163,46 @@ export default function AdminAppLayout({
               );
             })}
           </ul>
+
+          <div className="mt-6">
+            <p className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-widest text-muted">
+              Account
+            </p>
+            <ul>
+              <li>
+                <Link
+                  href="/dashboard"
+                  className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted transition-colors hover:bg-[#f2f2f2] hover:text-foreground"
+                >
+                  <svg
+                    className="h-4 w-4 shrink-0"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={1.75}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                    />
+                  </svg>
+                  Account Overview
+                </Link>
+              </li>
+            </ul>
+          </div>
         </nav>
 
-        {/* Admin info + Logout */}
+        {/* Artisan info + Logout */}
         <div className="border-t border-border px-5 py-4">
           <div className="flex items-center gap-3">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand text-xs font-bold text-foreground">
-              {admin.name.charAt(0).toUpperCase()}
+              {firstName.charAt(0).toUpperCase()}
             </div>
             <div className="min-w-0">
-              <p className="truncate text-sm font-medium">{admin.name}</p>
-              <p className="truncate text-xs text-muted">{admin.email}</p>
+              <p className="truncate text-sm font-medium">{artisan.fullName}</p>
+              <p className="truncate text-xs text-muted">{artisan.email}</p>
             </div>
           </div>
           <button
@@ -171,7 +227,7 @@ export default function AdminAppLayout({
         </div>
       </aside>
 
-      {/*%%%%% Main content %%%%%%*/}
+      {/* Main content */}
       <main className="ml-60 flex-1 min-h-screen">
         <div className="mx-auto max-w-6xl px-8 py-8">{children}</div>
       </main>
