@@ -40,6 +40,19 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     setLoading(false);
   }, []);
 
+  // When the admin API client detects both tokens are expired,
+  // clean up state and redirect to the admin login page.
+  useEffect(() => {
+    function handleSessionExpired() {
+      adminApi.clearTokens();
+      setAdmin(null);
+      window.location.href = "/admin/login";
+    }
+    window.addEventListener("admin:session-expired", handleSessionExpired);
+    return () =>
+      window.removeEventListener("admin:session-expired", handleSessionExpired);
+  }, []);
+
   const login = async (
     email: string,
     password: string

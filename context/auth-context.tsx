@@ -37,6 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  // Initial auth check on mount
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (token) {
@@ -45,6 +46,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     }
   }, [refreshUser]);
+
+  // When the API client detects both access + refresh tokens are expired,
+  // it fires this event so we clean up state and redirect to /login.
+  useEffect(() => {
+    function handleSessionExpired() {
+      api.clearTokens();
+      setArtisan(null);
+      window.location.href = "/login";
+    }
+    window.addEventListener("auth:session-expired", handleSessionExpired);
+    return () =>
+      window.removeEventListener("auth:session-expired", handleSessionExpired);
+  }, []);
 
   const login = async (email: string, password: string): Promise<Artisan> => {
     const data = await api.post<{

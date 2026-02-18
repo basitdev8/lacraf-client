@@ -16,9 +16,20 @@ interface ApiError {
 }
 
 class AdminApiClient {
+  // ── Token refresh concurrency guard ───────────────────────────────────────
+  private isRefreshing = false;
+  private refreshQueue: ((newToken: string | null) => void)[] = [];
+
+  // ── Storage helpers ───────────────────────────────────────────────────────
+
   private getAccessToken(): string | null {
     if (typeof window === "undefined") return null;
     return localStorage.getItem("adminAccessToken");
+  }
+
+  private getRefreshToken(): string | null {
+    if (typeof window === "undefined") return null;
+    return localStorage.getItem("adminRefreshToken");
   }
 
   setTokens(accessToken: string, refreshToken: string) {
@@ -31,6 +42,43 @@ class AdminApiClient {
     localStorage.removeItem("adminRefreshToken");
     localStorage.removeItem("adminUser");
   }
+
+  // ── Silent refresh ────────────────────────────────────────────────────────
+
+  private async performRefresh(): Promise<string | null> {
+    const refreshToken = this.getRefreshToken();
+    if (!refreshToken) return null;
+
+    try {
+      const res = await fetch(`${API_BASE}/auth/refresh`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${refreshToken}` },
+      });
+
+      if (!res.ok) {
+        this.clearTokens();
+        return null;
+      }
+
+      const json = await res.json();
+      const data = (
+        json as ApiResponse<{ accessToken: string; refreshToken: string }>
+      ).data;
+      this.setTokens(data.accessToken, data.refreshToken);
+      return data.accessToken;
+    } catch {
+      this.clearTokens();
+      return null;
+    }
+  }
+
+  private signalSessionExpired() {
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("admin:session-expired"));
+    }
+  }
+
+  // ── Core request ──────────────────────────────────────────────────────────
 
   private async request<T>(
     endpoint: string,
@@ -48,6 +96,50 @@ class AdminApiClient {
     }
 
     const res = await fetch(url, { ...options, headers });
+
+    // ── Handle 401 with silent token refresh ──────────────────────────────
+    if (
+      res.status === 401 &&
+      !endpoint.includes("/auth/refresh") &&
+      !endpoint.includes("/admin/login")
+    ) {
+      let newToken: string | null;
+
+      if (this.isRefreshing) {
+        newToken = await new Promise<string | null>((resolve) => {
+          this.refreshQueue.push(resolve);
+        });
+      } else {
+        this.isRefreshing = true;
+        newToken = await this.performRefresh();
+        this.refreshQueue.forEach((resolve) => resolve(newToken));
+        this.refreshQueue = [];
+        this.isRefreshing = false;
+      }
+
+      if (!newToken) {
+        this.signalSessionExpired();
+        throw new Error("Your session has expired. Please log in again.");
+      }
+
+      // Retry with fresh token
+      const retryHeaders: Record<string, string> = {
+        ...headers,
+        Authorization: `Bearer ${newToken}`,
+      };
+      const retryRes = await fetch(url, { ...options, headers: retryHeaders });
+      const retryJson = await retryRes.json();
+
+      if (!retryRes.ok) {
+        const err = retryJson as ApiError;
+        const msg = Array.isArray(err.message) ? err.message[0] : err.message;
+        throw new Error(msg || "Something went wrong");
+      }
+
+      return (retryJson as ApiResponse<T>).data;
+    }
+
+    // ── Normal path ───────────────────────────────────────────────────────
     const json = await res.json();
 
     if (!res.ok) {
@@ -60,6 +152,8 @@ class AdminApiClient {
 
     return (json as ApiResponse<T>).data;
   }
+
+  // ── Public methods ────────────────────────────────────────────────────────
 
   async post<T>(endpoint: string, body?: unknown): Promise<T> {
     return this.request<T>(endpoint, {

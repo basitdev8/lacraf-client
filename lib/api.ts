@@ -17,6 +17,15 @@ interface ApiError {
 }
 
 class ApiClient {
+  // ── Token refresh concurrency guard ───────────────────────────────────────
+  // If multiple requests fire at the same time and all get 401, only the first
+  // one should call /auth/refresh. The rest wait in a queue and reuse the
+  // new token once it arrives.
+  private isRefreshing = false;
+  private refreshQueue: ((newToken: string | null) => void)[] = [];
+
+  // ── Storage helpers ───────────────────────────────────────────────────────
+
   private getAccessToken(): string | null {
     if (typeof window === "undefined") return null;
     return localStorage.getItem("accessToken");
@@ -37,9 +46,49 @@ class ApiClient {
     localStorage.removeItem("refreshToken");
   }
 
+  // ── Silent refresh ────────────────────────────────────────────────────────
+  // Calls POST /auth/refresh with the stored refresh token.
+  // Returns the new access token, or null if the refresh token is expired/missing.
+
+  private async performRefresh(): Promise<string | null> {
+    const refreshToken = this.getRefreshToken();
+    if (!refreshToken) return null;
+
+    try {
+      const res = await fetch(`${API_BASE}/auth/refresh`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${refreshToken}` },
+      });
+
+      if (!res.ok) {
+        this.clearTokens();
+        return null;
+      }
+
+      const json = await res.json();
+      const data = (json as ApiResponse<{ accessToken: string; refreshToken: string }>).data;
+      this.setTokens(data.accessToken, data.refreshToken);
+      return data.accessToken;
+    } catch {
+      this.clearTokens();
+      return null;
+    }
+  }
+
+  // Called when the refresh token is also expired — signals the AuthProvider
+  // to clear state and send the user to /login.
+  private signalSessionExpired() {
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("auth:session-expired"));
+    }
+  }
+
+  // ── Core request ──────────────────────────────────────────────────────────
+
   private async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    isRetry = false
   ): Promise<T> {
     const url = `${API_BASE}${endpoint}`;
     const headers: Record<string, string> = {
@@ -57,6 +106,56 @@ class ApiClient {
     }
 
     const res = await fetch(url, { ...options, headers });
+
+    // ── Handle 401 with silent token refresh (only once per original request) ──
+    if (
+      res.status === 401 &&
+      !isRetry &&
+      !endpoint.includes("/auth/refresh") &&
+      !endpoint.includes("/auth/login") &&
+      !endpoint.includes("/admin/login")
+    ) {
+      let newToken: string | null;
+
+      if (this.isRefreshing) {
+        // Another request already triggered a refresh — wait for it
+        newToken = await new Promise<string | null>((resolve) => {
+          this.refreshQueue.push(resolve);
+        });
+      } else {
+        // This request is first to see the 401 — do the refresh
+        this.isRefreshing = true;
+        newToken = await this.performRefresh();
+        // Unblock all queued requests with the outcome
+        this.refreshQueue.forEach((resolve) => resolve(newToken));
+        this.refreshQueue = [];
+        this.isRefreshing = false;
+      }
+
+      if (!newToken) {
+        // Refresh token also expired — force logout
+        this.signalSessionExpired();
+        throw new Error("Your session has expired. Please log in again.");
+      }
+
+      // Retry the original request once with the fresh token
+      const retryHeaders: Record<string, string> = {
+        ...headers,
+        Authorization: `Bearer ${newToken}`,
+      };
+      const retryRes = await fetch(url, { ...options, headers: retryHeaders });
+      const retryJson = await retryRes.json();
+
+      if (!retryRes.ok) {
+        const err = retryJson as ApiError;
+        const msg = Array.isArray(err.message) ? err.message[0] : err.message;
+        throw new Error(msg || "Something went wrong");
+      }
+
+      return (retryJson as ApiResponse<T>).data;
+    }
+
+    // ── Normal path ───────────────────────────────────────────────────────────
     const json = await res.json();
 
     if (!res.ok) {
@@ -69,6 +168,8 @@ class ApiClient {
 
     return (json as ApiResponse<T>).data;
   }
+
+  // ── Public methods ────────────────────────────────────────────────────────
 
   async post<T>(endpoint: string, body?: unknown): Promise<T> {
     return this.request<T>(endpoint, {
