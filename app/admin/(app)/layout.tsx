@@ -152,7 +152,7 @@ export default function AdminAppLayout({
         </div>
       </aside>
 
-      {/* Main content */}
+      {/*%%%%% Main content %%%%%%*/}
       <main className="ml-60 flex-1 min-h-screen">
         <div className="mx-auto max-w-6xl px-8 py-8">{children}</div>
       </main>
