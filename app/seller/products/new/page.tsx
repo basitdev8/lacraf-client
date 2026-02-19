@@ -776,11 +776,14 @@ function ImagesStep({
     try {
       const formData = new FormData();
       previews.forEach((p) => formData.append("images", p.file));
-      const result = await api.postForm<{ images: { id: string; url: string }[] }>(
+      const result = await api.postForm<{ images: { id: string; url?: string; secureUrl?: string }[] }>(
         `/products/${form.productId}/images`,
         formData
       );
-      const newImages = result.images ?? [];
+      const newImages = (result.images ?? []).map((img) => ({
+        id: img.id,
+        url: img.url ?? img.secureUrl ?? "",
+      }));
       const all = [...uploadedImages, ...newImages];
       setUploadedImages(all);
       setPreviews([]);
