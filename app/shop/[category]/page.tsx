@@ -8,7 +8,6 @@ import ProductGrid from "@/components/store/product-grid";
 const API_BASE =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api/v1";
 
-// ── Valid top-level category slugs ─────────────────────────────────────────
 const VALID_CATEGORY_SLUGS = ["handicraft", "handloom", "edibles", "gifts"];
 
 const CATEGORY_DESCRIPTIONS: Record<string, string> = {
@@ -18,25 +17,16 @@ const CATEGORY_DESCRIPTIONS: Record<string, string> = {
   gifts: "Curated gifts from the finest Indian craftspeople.",
 };
 
-async function fetchCategoryBySlug(
-  slug: string
-): Promise<StoreCategory | null> {
+async function fetchAllCategories(): Promise<StoreCategory[]> {
   try {
-    const res = await fetch(`${API_BASE}/categories`, {
+    const res = await fetch(`${API_BASE}/storefront/categories`, {
       next: { revalidate: 3600 },
     });
-    if (!res.ok) return null;
+    if (!res.ok) return [];
     const json = await res.json();
-    const categories: StoreCategory[] = Array.isArray(json)
-      ? json
-      : json.data ?? [];
-    return (
-      categories.find(
-        (c) => c.slug.toLowerCase() === slug.toLowerCase()
-      ) ?? null
-    );
+    return Array.isArray(json) ? json : json.data ?? [];
   } catch {
-    return null;
+    return [];
   }
 }
 
@@ -64,7 +54,6 @@ function GiftsComingSoon() {
   );
 }
 
-// ── Filter icon ────────────────────────────────────────────────────────────
 function FilterIcon() {
   return (
     <svg
@@ -97,23 +86,30 @@ export default async function CategoryPage({
     notFound();
   }
 
-  // Gifts is a special "coming soon" category
   if (category === "gifts") {
     return <GiftsComingSoon />;
   }
 
-  const categoryData = await fetchCategoryBySlug(category);
+  // Fetch all categories and find the one matching this slug
+  const allCategories = await fetchAllCategories();
+  const categoryData =
+    allCategories.find((c) => c.slug.toLowerCase() === category.toLowerCase()) ??
+    null;
 
-  // Resolve display names
-  const categoryDisplayName = categoryData?.name ?? category.toUpperCase();
+  // Resolve subcategory by slug → get UUID
   const activeSubcategory = categoryData?.subcategories.find(
     (s) => s.slug === sub
   ) ?? null;
+
+  // IDs to pass to ProductGrid
+  const categoryId = categoryData?.id;
+  const subcategoryId = activeSubcategory?.id;
+
+  const categoryDisplayName = categoryData?.name ?? category;
   const pageTitle = activeSubcategory
     ? activeSubcategory.name.toUpperCase()
     : categoryDisplayName.toUpperCase();
-  const description =
-    CATEGORY_DESCRIPTIONS[category] ?? "Handmade with care.";
+  const description = CATEGORY_DESCRIPTIONS[category] ?? "Handmade with care.";
 
   return (
     <div className="max-w-[1200px] mx-auto px-6 pb-16">
@@ -157,7 +153,6 @@ export default async function CategoryPage({
           </p>
         </div>
 
-        {/* Filter button (decorative — extend for attribute filters later) */}
         <button className="flex items-center gap-2 text-[10px] tracking-[0.2em] text-[#0a0a0a] hover:opacity-60 transition-opacity mt-1">
           <FilterIcon />
           Filter
@@ -192,10 +187,7 @@ export default async function CategoryPage({
           </div>
         }
       >
-        <ProductGrid
-          categorySlug={category}
-          subcategorySlug={sub}
-        />
+        <ProductGrid categoryId={categoryId} subcategoryId={subcategoryId} />
       </Suspense>
     </div>
   );

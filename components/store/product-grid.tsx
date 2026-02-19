@@ -7,93 +7,93 @@ import Link from "next/link";
 const API_BASE =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api/v1";
 
-export interface PublicProduct {
+export interface StorefrontProduct {
   id: string;
   title: string;
-  status: string;
+  isMadeToOrder: boolean;
+  leadTimeDays: number | null;
   images: Array<{
     id: string;
-    url: string;
-    publicId?: string;
-    isDefault?: boolean;
+    publicId: string;
+    secureUrl: string;
+    sortOrder: number;
   }>;
   variants: Array<{
     id: string;
+    label: string;
     price: number;
-    isDefault?: boolean;
     stock: number;
+    isDefault: boolean;
   }>;
-  shop?: { shopName: string };
-  category?: { name: string; slug: string };
-  subcategory?: { name: string; slug: string };
-  hasGiCertificate?: boolean;
+  category: { id: string; name: string; slug: string } | null;
+  subcategory: { id: string; name: string; slug: string } | null;
+  artisan: {
+    id: string;
+    shop: { shopName: string } | null;
+  } | null;
 }
 
 interface ProductsResponse {
-  products: PublicProduct[];
+  products: StorefrontProduct[];
   total: number;
   page: number;
   limit: number;
   totalPages: number;
 }
 
-async function fetchPublicProducts(params: {
-  categorySlug?: string;
-  subcategorySlug?: string;
+async function fetchStorefrontProducts(params: {
+  categoryId?: string;
+  subcategoryId?: string;
   page: number;
   limit: number;
 }): Promise<ProductsResponse> {
   const qs = new URLSearchParams();
-  if (params.categorySlug) qs.set("categorySlug", params.categorySlug);
-  if (params.subcategorySlug) qs.set("subcategorySlug", params.subcategorySlug);
+  if (params.categoryId) qs.set("categoryId", params.categoryId);
+  if (params.subcategoryId) qs.set("subcategoryId", params.subcategoryId);
   qs.set("page", String(params.page));
   qs.set("limit", String(params.limit));
 
-  // Public browse endpoint — returns APPROVED products visible to all visitors.
-  // Backend: GET /api/v1/products/browse
-  const res = await fetch(`${API_BASE}/products/browse?${qs.toString()}`, {
-    cache: "no-store",
-  });
-
-  if (!res.ok) {
+  try {
+    const res = await fetch(
+      `${API_BASE}/storefront/products?${qs.toString()}`,
+      { cache: "no-store" }
+    );
+    if (!res.ok) {
+      return { products: [], total: 0, page: 1, limit: params.limit, totalPages: 0 };
+    }
+    const json = await res.json();
+    const data = json.data ?? json;
+    return {
+      products: data.products ?? [],
+      total: data.total ?? 0,
+      page: data.page ?? 1,
+      limit: data.limit ?? params.limit,
+      totalPages: data.totalPages ?? 0,
+    };
+  } catch {
     return { products: [], total: 0, page: 1, limit: params.limit, totalPages: 0 };
   }
-
-  const json = await res.json();
-  const data = json.data ?? json;
-  return {
-    products: data.products ?? data.items ?? [],
-    total: data.total ?? 0,
-    page: data.page ?? 1,
-    limit: data.limit ?? params.limit,
-    totalPages: data.totalPages ?? 0,
-  };
 }
 
 function formatPrice(price: number): string {
-  return `₹${price.toLocaleString("en-IN")}`;
+  return `₹${Number(price).toLocaleString("en-IN")}`;
 }
 
-function getDefaultPrice(variants: PublicProduct["variants"]): number | null {
-  if (!variants || variants.length === 0) return null;
+function getDefaultPrice(variants: StorefrontProduct["variants"]): number | null {
+  if (!variants?.length) return null;
   const def = variants.find((v) => v.isDefault) ?? variants[0];
-  return def.price;
+  return Number(def.price);
 }
 
-function getDefaultImage(images: PublicProduct["images"]): string | null {
-  if (!images || images.length === 0) return null;
-  const def = images.find((i) => i.isDefault) ?? images[0];
-  return def.url;
-}
-
-function ProductCard({ product }: { product: PublicProduct }) {
-  const imageUrl = getDefaultImage(product.images);
+function ProductCard({ product }: { product: StorefrontProduct }) {
+  const imageUrl = product.images?.[0]?.secureUrl ?? null;
   const price = getDefaultPrice(product.variants);
+  const shopName = product.artisan?.shop?.shopName;
 
   return (
     <Link href={`/shop/product/${product.id}`} className="group block">
       {/* Image */}
-      <div className="relative w-full bg-[#d4d0cb] overflow-hidden aspect-[3/4]">
+      <div className="relative w-full bg-[#c8c4bd] overflow-hidden aspect-[3/4]">
         {imageUrl ? (
           <Image
             src={imageUrl}
@@ -103,18 +103,22 @@ function ProductCard({ product }: { product: PublicProduct }) {
             className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
           />
         ) : (
-          // Placeholder matching the screenshot gray
           <div className="absolute inset-0 bg-[#c8c4bd]" />
         )}
-        {product.hasGiCertificate && (
+        {product.isMadeToOrder && (
           <span className="absolute top-2.5 left-2.5 text-[8px] tracking-[0.15em] bg-white text-[#0a0a0a] px-2 py-0.5">
-            GI TAGGED
+            MADE TO ORDER
           </span>
         )}
       </div>
 
       {/* Info */}
       <div className="mt-2.5 space-y-0.5">
+        {shopName && (
+          <p className="text-[8px] tracking-[0.18em] text-[#8a8a8a] uppercase">
+            {shopName}
+          </p>
+        )}
         <p className="text-[10px] tracking-[0.18em] text-[#0a0a0a] leading-snug uppercase font-light">
           {product.title}
         </p>
@@ -141,17 +145,14 @@ function ProductSkeleton() {
 }
 
 interface ProductGridProps {
-  categorySlug: string;
-  subcategorySlug?: string;
+  categoryId?: string;
+  subcategoryId?: string;
 }
 
 const PAGE_SIZE = 12;
 
-export default function ProductGrid({
-  categorySlug,
-  subcategorySlug,
-}: ProductGridProps) {
-  const [products, setProducts] = useState<PublicProduct[]>([]);
+export default function ProductGrid({ categoryId, subcategoryId }: ProductGridProps) {
+  const [products, setProducts] = useState<StorefrontProduct[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -162,9 +163,9 @@ export default function ProductGrid({
       if (replace) setLoading(true);
       else setLoadingMore(true);
 
-      const result = await fetchPublicProducts({
-        categorySlug,
-        subcategorySlug,
+      const result = await fetchStorefrontProducts({
+        categoryId,
+        subcategoryId,
         page: pageNum,
         limit: PAGE_SIZE,
       });
@@ -178,10 +179,9 @@ export default function ProductGrid({
       if (replace) setLoading(false);
       else setLoadingMore(false);
     },
-    [categorySlug, subcategorySlug]
+    [categoryId, subcategoryId]
   );
 
-  // Reload from page 1 when filters change
   useEffect(() => {
     loadProducts(1, true);
   }, [loadProducts]);

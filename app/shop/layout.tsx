@@ -20,13 +20,14 @@ export interface StoreCategory {
 
 async function fetchCategories(): Promise<StoreCategory[]> {
   try {
-    const res = await fetch(`${API_BASE}/categories`, {
+    const res = await fetch(`${API_BASE}/storefront/categories`, {
       next: { revalidate: 3600 },
     });
     if (!res.ok) return [];
     const json = await res.json();
-    // API wraps response in { data: [...] }
-    return Array.isArray(json) ? json : json.data ?? [];
+    // API wraps response in { success, data: [...] }
+    const raw = Array.isArray(json) ? json : json.data ?? [];
+    return raw;
   } catch {
     return [];
   }
