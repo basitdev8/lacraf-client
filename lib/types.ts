@@ -83,8 +83,9 @@ export interface ProductAttribute {
 
 export interface ProductImage {
   id: string;
-  url: string;
-  isDefault: boolean;
+  publicId: string;
+  secureUrl: string;
+  sortOrder: number;
 }
 
 export interface ProductVariant {

@@ -72,7 +72,8 @@ export default function ProductPurchasePanel({
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
 
-  const price = selectedVariant ? Number(selectedVariant.price) : null;
+  const rawPrice = selectedVariant ? Number(selectedVariant.price) : null;
+  const price = rawPrice !== null && !isNaN(rawPrice) ? rawPrice : null;
   const inStock = selectedVariant ? selectedVariant.stock > 0 : false;
   const maxQty = selectedVariant ? Math.min(selectedVariant.stock, 10) : 1;
 

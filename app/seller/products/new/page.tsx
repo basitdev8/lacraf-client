@@ -1071,7 +1071,7 @@ function ReviewStep({
                     )}
                   </div>
                   <div className="text-sm text-muted">
-                    ₹{parseFloat(v.price).toLocaleString("en-IN")} &nbsp;·&nbsp;{v.stock} in
+                    {(() => { const p = parseFloat(v.price); return isNaN(p) ? "—" : `₹${p.toLocaleString("en-IN")}`; })()} &nbsp;·&nbsp;{v.stock} in
                     stock
                   </div>
                 </div>

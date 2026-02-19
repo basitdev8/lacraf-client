@@ -235,7 +235,7 @@ function ProductsContent() {
                         {product.images?.[0] ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
-                            src={product.images[0].url}
+                            src={product.images[0].secureUrl}
                             alt={product.title}
                             className="h-full w-full object-cover"
                           />

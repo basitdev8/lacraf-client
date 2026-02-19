@@ -95,7 +95,7 @@ export default function AdminProductDetailPage() {
           : { decision, reason: reason.trim() }
       );
       setProduct((prev) =>
-        prev ? { ...prev, status: res.status } : prev
+        prev ? { ...prev, status: res.product.status } : prev
       );
       setReviewSuccess(
         decision === "APPROVED"
@@ -242,21 +242,21 @@ export default function AdminProductDetailPage() {
           <Section title={`Images (${product.images?.length ?? 0})`}>
             {product.images?.length > 0 ? (
               <div className="flex flex-wrap gap-3">
-                {product.images.map((img) => (
+                {product.images.map((img, index) => (
                   <a
                     key={img.id}
-                    href={img.url}
+                    href={img.secureUrl}
                     target="_blank"
                     rel="noreferrer"
                     className="group relative h-24 w-24 overflow-hidden rounded-xl border border-border"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={img.url}
+                      src={img.secureUrl}
                       alt="product"
                       className="h-full w-full object-cover transition-opacity group-hover:opacity-80"
                     />
-                    {img.isDefault && (
+                    {index === 0 && (
                       <span className="absolute bottom-1 left-1 rounded bg-black/60 px-1 py-0.5 text-[9px] font-semibold text-white uppercase tracking-wider">
                         Main
                       </span>
@@ -286,7 +286,7 @@ export default function AdminProductDetailPage() {
                       </div>
                       <div className="text-sm text-right">
                         <span className="font-medium">
-                          ₹{Number(v.price).toLocaleString("en-IN")}
+                          {(() => { const p = Number(v.price); return isNaN(p) ? "₹—" : `₹${p.toLocaleString("en-IN")}`; })()}
                         </span>
                         <span className="ml-3 text-muted">{v.stock} in stock</span>
                       </div>

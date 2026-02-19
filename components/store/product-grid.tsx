@@ -82,7 +82,8 @@ function formatPrice(price: number): string {
 function getDefaultPrice(variants: StorefrontProduct["variants"]): number | null {
   if (!variants?.length) return null;
   const def = variants.find((v) => v.isDefault) ?? variants[0];
-  return Number(def.price);
+  const p = Number(def.price);
+  return isNaN(p) ? null : p;
 }
 
 function ProductCard({ product }: { product: StorefrontProduct }) {

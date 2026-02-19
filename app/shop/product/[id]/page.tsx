@@ -91,9 +91,10 @@ function formatPrice(price: number): string {
 // ── Related product card (thin strip version) ───────────────────────────────
 function RelatedCard({ product }: { product: StorefrontProduct }) {
   const img = product.images?.[0]?.secureUrl;
-  const price =
+  const rawPrice =
     product.variants.find((v) => v.isDefault)?.price ??
     product.variants[0]?.price;
+  const price = rawPrice !== undefined ? Number(rawPrice) : undefined;
 
   return (
     <Link href={`/shop/product/${product.id}`} className="group flex-shrink-0 w-48 md:w-auto">
@@ -114,9 +115,9 @@ function RelatedCard({ product }: { product: StorefrontProduct }) {
         <p className="text-[10px] tracking-[0.15em] text-[#0a0a0a] uppercase font-light leading-snug">
           {product.title}
         </p>
-        {price !== undefined && (
+        {price !== undefined && !isNaN(price) && (
           <p className="text-[10px] text-[#0a0a0a]">
-            {formatPrice(Number(price))}
+            {formatPrice(price)}
           </p>
         )}
       </div>

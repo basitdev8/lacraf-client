@@ -103,7 +103,7 @@ export interface AdminProductListItem {
   shop?: {
     shopName: string;
   };
-  images: { id: string; url: string; isDefault: boolean }[];
+  images: { id: string; publicId: string; secureUrl: string; sortOrder: number }[];
   _count?: { variants: number };
 }
 
@@ -117,7 +117,7 @@ export interface AdminProductDetail extends AdminProductListItem {
     stock: number;
     isDefault: boolean;
     attributes: { key: string; label: string; type: string; value: string }[];
-    images: { id: string; url: string; isDefault: boolean }[];
+    images: { id: string; publicId: string; secureUrl: string; sortOrder: number }[];
   }[];
 }
 
@@ -131,7 +131,10 @@ export interface AdminProductsListResponse {
 
 export interface ProductReviewResponse {
   message: string;
-  productId: string;
-  decision: "APPROVED" | "REJECTED";
-  status: ProductStatus;
+  product: {
+    id: string;
+    status: ProductStatus;
+    rejectionReason: string | null;
+    reviewedAt: string | null;
+  };
 }
