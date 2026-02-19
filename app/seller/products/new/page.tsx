@@ -262,6 +262,140 @@ function CategoryStep({
   );
 }
 
+// ─── AI Enhancement Preview Modal ─────────────────────────────────────────────
+
+interface EnhancedResult {
+  title: string;
+  description: string;
+  attributes: { key: string; label: string; value: string }[];
+}
+
+function AiPreviewModal({
+  original,
+  enhanced,
+  templates,
+  onApply,
+  onClose,
+}: {
+  original: { title: string; description: string; attrValues: Record<string, string> };
+  enhanced: EnhancedResult;
+  templates: AttributeTemplate[];
+  onApply: (result: EnhancedResult) => void;
+  onClose: () => void;
+}) {
+  const enhancedAttrMap: Record<string, string> = {};
+  enhanced.attributes.forEach((a) => {
+    enhancedAttrMap[a.key] = a.value;
+  });
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-border bg-white shadow-2xl">
+        {/* Header */}
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-white px-6 py-4">
+          <div className="flex items-center gap-2">
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand/10">
+              <svg className="h-3.5 w-3.5 text-brand-dark" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2L9.09 8.26L2 9.27L7 14.14L5.82 21.02L12 17.77L18.18 21.02L17 14.14L22 9.27L14.91 8.26L12 2Z"/>
+              </svg>
+            </span>
+            <p className="font-semibold text-sm">AI Enhancement Preview</p>
+          </div>
+          <button onClick={onClose} className="rounded-lg p-1.5 text-muted hover:bg-[#f5f5f5] transition-colors">
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+
+        <div className="p-6 space-y-5">
+          <p className="text-xs text-muted">
+            Review the AI-enhanced version below. Apply to replace your current content, or close to keep your original.
+          </p>
+
+          {/* Title comparison */}
+          <div className="rounded-xl border border-border overflow-hidden">
+            <p className="px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-muted bg-[#f9f9f9] border-b border-border">
+              Title
+            </p>
+            <div className="grid grid-cols-2 divide-x divide-border">
+              <div className="p-4">
+                <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted">Original</p>
+                <p className="text-sm text-foreground/70">{original.title || <em className="text-muted">empty</em>}</p>
+              </div>
+              <div className="p-4 bg-brand-light/20">
+                <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-brand-dark">Enhanced</p>
+                <p className="text-sm font-medium">{enhanced.title}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Description comparison */}
+          <div className="rounded-xl border border-border overflow-hidden">
+            <p className="px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-muted bg-[#f9f9f9] border-b border-border">
+              Description
+            </p>
+            <div className="grid grid-cols-2 divide-x divide-border">
+              <div className="p-4">
+                <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted">Original</p>
+                <p className="text-sm text-foreground/70 whitespace-pre-wrap leading-relaxed">{original.description || <em className="text-muted">empty</em>}</p>
+              </div>
+              <div className="p-4 bg-brand-light/20">
+                <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-brand-dark">Enhanced</p>
+                <p className="text-sm whitespace-pre-wrap leading-relaxed">{enhanced.description}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Attributes comparison */}
+          {templates.filter((t) => t.type !== "BOOLEAN" && enhanced.attributes.some((a) => a.key === t.key && a.value)).length > 0 && (
+            <div className="rounded-xl border border-border overflow-hidden">
+              <p className="px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-muted bg-[#f9f9f9] border-b border-border">
+                Attributes
+              </p>
+              {templates
+                .filter((t) => t.type !== "BOOLEAN" && enhanced.attributes.some((a) => a.key === t.key && a.value))
+                .map((t) => {
+                  const orig = original.attrValues[t.key] ?? "";
+                  const enh = enhancedAttrMap[t.key] ?? "";
+                  if (!enh || orig === enh) return null;
+                  return (
+                    <div key={t.key} className="grid grid-cols-2 divide-x divide-border border-t border-border first:border-t-0">
+                      <div className="p-4">
+                        <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted">{t.label} (original)</p>
+                        <p className="text-sm text-foreground/70">{orig || <em className="text-muted/60">empty</em>}</p>
+                      </div>
+                      <div className="p-4 bg-brand-light/20">
+                        <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-brand-dark">{t.label} (enhanced)</p>
+                        <p className="text-sm font-medium">{enh}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="sticky bottom-0 z-10 flex justify-end gap-3 border-t border-border bg-white px-6 py-4">
+          <button onClick={onClose} className="btn-outline text-sm">
+            Keep Original
+          </button>
+          <button
+            onClick={() => onApply(enhanced)}
+            className="btn-brand text-sm"
+          >
+            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2L9.09 8.26L2 9.27L7 14.14L5.82 21.02L12 17.77L18.18 21.02L17 14.14L22 9.27L14.91 8.26L12 2Z"/>
+            </svg>
+            Apply AI Enhancements
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Step 2: Details ──────────────────────────────────────────────────────────
 
 function DetailsStep({
@@ -284,9 +418,56 @@ function DetailsStep({
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [enhancing, setEnhancing] = useState(false);
+  const [aiError, setAiError] = useState("");
+  const [aiPreview, setAiPreview] = useState<EnhancedResult | null>(null);
 
   const templates: AttributeTemplate[] =
     form.subcategory?.attributeTemplates ?? [];
+
+  async function handleEnhance() {
+    if (!title.trim() && !description.trim()) {
+      setAiError("Enter at least a title or description before enhancing.");
+      return;
+    }
+    setAiError("");
+    setEnhancing(true);
+    try {
+      const payload = {
+        title: title.trim() || "Handcrafted product",
+        description: description.trim() || "A unique handcrafted product.",
+        category: form.category?.name ?? "",
+        subcategory: form.subcategory?.name ?? "",
+        attributes: templates
+          .filter((t) => attrValues[t.key]?.trim())
+          .map((t) => ({ key: t.key, label: t.label, value: attrValues[t.key] })),
+      };
+      const result = await api.post<{ message: string; enhanced: EnhancedResult }>(
+        "/ai/enhance-product",
+        payload
+      );
+      setAiPreview(result.enhanced);
+    } catch (e) {
+      setAiError(e instanceof Error ? e.message : "AI enhancement failed. Please try again.");
+    } finally {
+      setEnhancing(false);
+    }
+  }
+
+  function handleApplyAi(result: EnhancedResult) {
+    setTitle(result.title);
+    setDescription(result.description);
+    const newAttrs: Record<string, string> = { ...attrValues };
+    result.attributes.forEach((a) => {
+      // Only apply text-based attributes, leave BOOLEAN as-is
+      const tmpl = templates.find((t) => t.key === a.key);
+      if (tmpl && tmpl.type !== "BOOLEAN" && a.value) {
+        newAttrs[a.key] = a.value;
+      }
+    });
+    setAttrValues(newAttrs);
+    setAiPreview(null);
+  }
 
   async function handleNext() {
     setError("");
@@ -348,142 +529,182 @@ function DetailsStep({
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-lg font-semibold">Product Details</h2>
-        <p className="mt-1 text-sm text-muted">
-          {form.category?.name} → {form.subcategory?.name}
-        </p>
-      </div>
-
-      {error && (
-        <p className="rounded-xl border border-error/20 bg-error/5 px-4 py-3 text-sm text-error">
-          {error}
-        </p>
+    <>
+      {aiPreview && (
+        <AiPreviewModal
+          original={{ title, description, attrValues }}
+          enhanced={aiPreview}
+          templates={templates}
+          onApply={handleApplyAi}
+          onClose={() => setAiPreview(null)}
+        />
       )}
 
-      <div className="space-y-5">
-        <div>
-          <label className="mb-1 block text-xs font-semibold text-muted uppercase tracking-wider">
-            Product Title *
-          </label>
-          <input
-            className="input-underline"
-            placeholder="e.g. Premium Kashmiri Saffron"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            maxLength={200}
-          />
-        </div>
-
-        <div>
-          <label className="mb-1 block text-xs font-semibold text-muted uppercase tracking-wider">
-            Description * (min 20 chars)
-          </label>
-          <textarea
-            className="textarea-underline"
-            placeholder="Describe your product — origin, materials, craftsmanship, what makes it special..."
-            rows={4}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            maxLength={2000}
-          />
-          <p className="mt-1 text-right text-xs text-muted">
-            {description.length}/2000
-          </p>
-        </div>
-
-        {/* Dynamic attributes */}
-        {templates.length > 0 && (
-          <div className="space-y-4">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted">
-              Product Attributes
+      <div className="space-y-6">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h2 className="text-lg font-semibold">Product Details</h2>
+            <p className="mt-1 text-sm text-muted">
+              {form.category?.name} → {form.subcategory?.name}
             </p>
-            {templates.map((t) => (
-              <div key={t.key}>
-                <label className="mb-1 block text-xs font-semibold text-muted uppercase tracking-wider">
-                  {t.label}
-                  {t.isRequired ? " *" : " (optional)"}
-                  {t.unit ? ` (${t.unit})` : ""}
-                </label>
-                {t.type === "LONG_TEXT" ? (
-                  <textarea
-                    className="textarea-underline"
-                    rows={3}
-                    placeholder={`Enter ${t.label.toLowerCase()}…`}
-                    value={attrValues[t.key] ?? ""}
-                    onChange={(e) =>
-                      setAttrValues((prev) => ({
-                        ...prev,
-                        [t.key]: e.target.value,
-                      }))
-                    }
-                  />
-                ) : t.type === "BOOLEAN" ? (
-                  <div className="flex gap-4 py-2">
-                    {["Yes", "No"].map((opt) => (
-                      <label key={opt} className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="radio"
-                          name={t.key}
-                          value={opt}
-                          checked={attrValues[t.key] === opt}
-                          onChange={() =>
-                            setAttrValues((prev) => ({
-                              ...prev,
-                              [t.key]: opt,
-                            }))
-                          }
-                          className="accent-brand"
-                        />
-                        <span className="text-sm">{opt}</span>
-                      </label>
-                    ))}
-                  </div>
-                ) : (
-                  <input
-                    type={t.type === "NUMBER" ? "number" : "text"}
-                    className="input-underline"
-                    placeholder={`Enter ${t.label.toLowerCase()}…`}
-                    value={attrValues[t.key] ?? ""}
-                    onChange={(e) =>
-                      setAttrValues((prev) => ({
-                        ...prev,
-                        [t.key]: e.target.value,
-                      }))
-                    }
-                  />
-                )}
-              </div>
-            ))}
           </div>
-        )}
-      </div>
+          <button
+            onClick={handleEnhance}
+            disabled={enhancing}
+            title="Let AI rewrite your title, description & attributes"
+            className="flex shrink-0 items-center gap-1.5 rounded-xl border border-brand/30 bg-brand-light/40 px-3 py-1.5 text-xs font-semibold text-brand-dark transition-all hover:border-brand hover:bg-brand-light disabled:opacity-50"
+          >
+            {enhancing ? (
+              <>
+                <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-brand/30 border-t-brand-dark" />
+                Enhancing…
+              </>
+            ) : (
+              <>
+                <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2L9.09 8.26L2 9.27L7 14.14L5.82 21.02L12 17.77L18.18 21.02L17 14.14L22 9.27L14.91 8.26L12 2Z"/>
+                </svg>
+                Enhance with AI
+              </>
+            )}
+          </button>
+        </div>
 
-      <div className="flex justify-between pt-4">
-        <button onClick={onBack} className="btn-outline">
-          Back
-        </button>
-        <button onClick={handleNext} disabled={saving} className="btn-brand">
-          {saving ? "Saving..." : "Continue"}
-          {!saving && (
-            <svg
-              className="h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M13 7l5 5m0 0l-5 5m5-5H6"
-              />
-            </svg>
+        {error && (
+          <p className="rounded-xl border border-error/20 bg-error/5 px-4 py-3 text-sm text-error">
+            {error}
+          </p>
+        )}
+
+        {aiError && (
+          <p className="rounded-xl border border-error/20 bg-error/5 px-4 py-3 text-sm text-error">
+            {aiError}
+          </p>
+        )}
+
+        <div className="space-y-5">
+          <div>
+            <label className="mb-1 block text-xs font-semibold text-muted uppercase tracking-wider">
+              Product Title *
+            </label>
+            <input
+              className="input-underline"
+              placeholder="e.g. Premium Kashmiri Saffron"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              maxLength={200}
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-xs font-semibold text-muted uppercase tracking-wider">
+              Description * (min 20 chars)
+            </label>
+            <textarea
+              className="textarea-underline"
+              placeholder="Describe your product — origin, materials, craftsmanship, what makes it special..."
+              rows={4}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              maxLength={2000}
+            />
+            <p className="mt-1 text-right text-xs text-muted">
+              {description.length}/2000
+            </p>
+          </div>
+
+          {/* Dynamic attributes */}
+          {templates.length > 0 && (
+            <div className="space-y-4">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted">
+                Product Attributes
+              </p>
+              {templates.map((t) => (
+                <div key={t.key}>
+                  <label className="mb-1 block text-xs font-semibold text-muted uppercase tracking-wider">
+                    {t.label}
+                    {t.isRequired ? " *" : " (optional)"}
+                    {t.unit ? ` (${t.unit})` : ""}
+                  </label>
+                  {t.type === "LONG_TEXT" ? (
+                    <textarea
+                      className="textarea-underline"
+                      rows={3}
+                      placeholder={`Enter ${t.label.toLowerCase()}…`}
+                      value={attrValues[t.key] ?? ""}
+                      onChange={(e) =>
+                        setAttrValues((prev) => ({
+                          ...prev,
+                          [t.key]: e.target.value,
+                        }))
+                      }
+                    />
+                  ) : t.type === "BOOLEAN" ? (
+                    <div className="flex gap-4 py-2">
+                      {["Yes", "No"].map((opt) => (
+                        <label key={opt} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name={t.key}
+                            value={opt}
+                            checked={attrValues[t.key] === opt}
+                            onChange={() =>
+                              setAttrValues((prev) => ({
+                                ...prev,
+                                [t.key]: opt,
+                              }))
+                            }
+                            className="accent-brand"
+                          />
+                          <span className="text-sm">{opt}</span>
+                        </label>
+                      ))}
+                    </div>
+                  ) : (
+                    <input
+                      type={t.type === "NUMBER" ? "number" : "text"}
+                      className="input-underline"
+                      placeholder={`Enter ${t.label.toLowerCase()}…`}
+                      value={attrValues[t.key] ?? ""}
+                      onChange={(e) =>
+                        setAttrValues((prev) => ({
+                          ...prev,
+                          [t.key]: e.target.value,
+                        }))
+                      }
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
           )}
-        </button>
+        </div>
+
+        <div className="flex justify-between pt-4">
+          <button onClick={onBack} className="btn-outline">
+            Back
+          </button>
+          <button onClick={handleNext} disabled={saving} className="btn-brand">
+            {saving ? "Saving..." : "Continue"}
+            {!saving && (
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M13 7l5 5m0 0l-5 5m5-5H6"
+                />
+              </svg>
+            )}
+          </button>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
