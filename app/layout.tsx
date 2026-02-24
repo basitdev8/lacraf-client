@@ -1,23 +1,74 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import { Playfair_Display } from "next/font/google";
+import localFont from "next/font/local";
 import { AuthProvider } from "@/context/auth-context";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+/* ── Gestura Headline TRIAL — headings / display ────────── */
+const gestura = localFont({
+  src: [
+    {
+      path: "../public/fonts/gestura/GesturaHeadlineTRIAL-Light.otf",
+      weight: "300",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/gestura/GesturaHeadlineTRIAL-LightItalic.otf",
+      weight: "300",
+      style: "italic",
+    },
+    {
+      path: "../public/fonts/gestura/GesturaHeadlineTRIAL-Regular.otf",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/gestura/GesturaHeadlineTRIAL-RegularItalic.otf",
+      weight: "400",
+      style: "italic",
+    },
+    {
+      path: "../public/fonts/gestura/GesturaHeadlineTRIAL-Semibold.otf",
+      weight: "600",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/gestura/GesturaHeadlineTRIAL-Bold.otf",
+      weight: "700",
+      style: "normal",
+    },
+  ],
+  variable: "--font-gestura",
+  display: "swap",
+  fallback: ["Georgia", "Times New Roman", "serif"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
-  subsets: ["latin"],
-  style: ["normal", "italic"],
+/* ── Mozaic GEO — body / UI text ────────────────────────── */
+const mozaic = localFont({
+  src: [
+    {
+      path: "../public/fonts/mozaic/MozaicGEO-Light.otf",
+      weight: "300",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/mozaic/MozaicGEO-Regular.otf",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/mozaic/MozaicGEO-Medium.otf",
+      weight: "500",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/mozaic/MozaicGEO-Bold.otf",
+      weight: "700",
+      style: "normal",
+    },
+  ],
+  variable: "--font-mozaic",
+  display: "swap",
+  fallback: ["system-ui", "Arial", "sans-serif"],
 });
 
 export const metadata: Metadata = {
@@ -34,7 +85,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} antialiased`}
+        className={`${gestura.variable} ${mozaic.variable} antialiased`}
       >
         <AuthProvider>{children}</AuthProvider>
       </body>

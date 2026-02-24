@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:www.gucci.com)",
+      "WebFetch(domain:www.prada.com)",
+      "WebFetch(domain:www.hermes.com)",
+      "WebFetch(domain:www.bulgari.com)",
+      "WebFetch(domain:medium.com)",
+      "WebFetch(domain:www.nngroup.com)",
+      "WebFetch(domain:kijo.london)",
+      "WebFetch(domain:www.convertcart.com)",
+      "WebFetch(domain:www.g-co.agency)",
+      "Bash(npx next build:*)"
+    ]
+  }
+}

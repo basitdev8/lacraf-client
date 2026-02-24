@@ -88,7 +88,7 @@ function formatPrice(price: number): string {
   return `₹${Number(price).toLocaleString("en-IN")}`;
 }
 
-// ── Related product card (thin strip version) ───────────────────────────────
+// ── Related product card ───────────────────────────────────────────────────
 function RelatedCard({ product }: { product: StorefrontProduct }) {
   const img = product.images?.[0]?.secureUrl;
   const rawPrice =
@@ -97,26 +97,29 @@ function RelatedCard({ product }: { product: StorefrontProduct }) {
   const price = rawPrice !== undefined ? Number(rawPrice) : undefined;
 
   return (
-    <Link href={`/shop/product/${product.id}`} className="group flex-shrink-0 w-48 md:w-auto">
-      <div className="relative w-full bg-[#c8c4bd] aspect-[3/4] overflow-hidden">
+    <Link
+      href={`/shop/product/${product.id}`}
+      className="group flex-shrink-0 w-56 md:w-auto"
+    >
+      <div className="relative w-full bg-[#f5f4f0] aspect-[3/4] overflow-hidden">
         {img ? (
           <Image
             src={img}
             alt={product.title}
             fill
-            sizes="200px"
-            className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+            sizes="(max-width: 768px) 224px, 25vw"
+            className="object-cover transition-all duration-700 ease-out group-hover:scale-[1.04]"
           />
         ) : (
-          <div className="absolute inset-0 bg-[#c8c4bd]" />
+          <div className="absolute inset-0 bg-[#f5f4f0]" />
         )}
       </div>
-      <div className="mt-2 space-y-0.5">
-        <p className="text-[10px] tracking-[0.15em] text-[#0a0a0a] uppercase font-light leading-snug">
+      <div className="mt-4 space-y-1.5">
+        <p className="text-[11px] tracking-[0.08em] text-[#0a0a0a] leading-snug group-hover:opacity-70 transition-opacity">
           {product.title}
         </p>
         {price !== undefined && !isNaN(price) && (
-          <p className="text-[10px] text-[#0a0a0a]">
+          <p className="text-[11px] tracking-[0.04em] text-[#6a6a6a]">
             {formatPrice(price)}
           </p>
         )}
@@ -161,201 +164,282 @@ export default async function ProductDetailPage({
     ),
   ].sort((a, b) => a.sortOrder - b.sortOrder);
 
-  // Map attributes for display (pick a few key ones for the editorial grid)
+  // Map attributes for display
   const displayAttributes = product.attributes.slice(0, 4);
 
   return (
     <>
-      {/* ── Hero: Image + Purchase panel ──────────────────────────────── */}
-      <div className="max-w-[1200px] mx-auto px-0 md:px-6">
-        <div className="grid grid-cols-1 md:grid-cols-[55%_45%] gap-0 md:gap-12 md:pt-6">
+      {/* ── Breadcrumb ──────────────────────────────────────────────── */}
+      <div className="max-w-[1400px] mx-auto px-6 pt-6 pb-2">
+        <nav className="flex items-center gap-2 text-[9px] tracking-[0.15em] text-[#9a9a9a]">
+          <Link
+            href="/shop"
+            className="hover:text-[#0a0a0a] transition-colors"
+          >
+            HOME
+          </Link>
+          <span>/</span>
+          {product.category && (
+            <>
+              <Link
+                href={`/shop/${product.category.slug}`}
+                className="hover:text-[#0a0a0a] transition-colors uppercase"
+              >
+                {product.category.name}
+              </Link>
+              <span>/</span>
+            </>
+          )}
+          <span className="text-[#0a0a0a]">{product.title}</span>
+        </nav>
+      </div>
+
+      {/* ── Hero: Gallery + Purchase Panel ─────────────────────────── */}
+      <div className="max-w-[1400px] mx-auto px-6">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_420px] gap-0 md:gap-16 pb-6">
           {/* Gallery */}
-          <div className="px-6 md:px-0">
+          <div>
             <ProductImageGallery images={allImages} />
           </div>
 
-          {/* Purchase panel */}
-          <div className="px-6 md:px-0 pt-6 md:pt-0 pb-10">
-            <ProductPurchasePanel
-              productId={product.id}
-              title={product.title}
-              shopName={shop?.shopName ?? null}
-              artisanId={artisan?.id ?? null}
-              variants={product.variants}
-              giCertUrl={product.giCertUrl}
-              isMadeToOrder={product.isMadeToOrder}
-              leadTimeDays={product.leadTimeDays}
-            />
+          {/* Purchase panel — sticky on desktop */}
+          <div className="pt-8 md:pt-0 pb-10">
+            <div className="md:sticky md:top-24">
+              <ProductPurchasePanel
+                productId={product.id}
+                title={product.title}
+                shopName={shop?.shopName ?? null}
+                artisanId={artisan?.id ?? null}
+                variants={product.variants}
+                giCertUrl={product.giCertUrl}
+                isMadeToOrder={product.isMadeToOrder}
+                leadTimeDays={product.leadTimeDays}
+              />
+            </div>
           </div>
         </div>
       </div>
 
-      {/* ── The Narrative ─────────────────────────────────────────────── */}
-      <section className="border-t border-[#e0e0e0] mt-10 py-16 px-6 text-center max-w-[780px] mx-auto">
-        <p className="text-[9px] tracking-[0.3em] text-[#8a8a8a] mb-6">
-          THE NARRATIVE
-        </p>
-        <h2
-          className="text-2xl md:text-4xl text-[#0a0a0a] leading-snug mb-6"
-          style={{ fontFamily: "var(--font-serif)" }}
-        >
-          {product.title.split(" ").slice(0, 4).join(" ").toUpperCase()}.
-        </h2>
-        <p className="text-[11px] md:text-xs leading-relaxed text-[#5a5a5a] tracking-wide max-w-[580px] mx-auto">
-          {product.description}
-        </p>
-        {shop && (
-          <p className="text-[9px] tracking-[0.2em] text-[#8a8a8a] mt-8 uppercase">
-            — {shop.shopName}, {shop.address?.split(",").slice(-2).join(",").trim()}
+      {/* ── The Narrative ─────────────────────────────────────────── */}
+      <section className="bg-[#faf9f7]">
+        <div className="max-w-[900px] mx-auto px-6 py-20 md:py-28 text-center">
+          <p className="text-[9px] tracking-[0.4em] text-[#9a9a9a] uppercase mb-8">
+            The Narrative
           </p>
-        )}
+
+          {/* Decorative line */}
+          <div className="w-8 h-px bg-[#d8d6d3] mx-auto mb-10" />
+
+          <h2
+            className="text-3xl md:text-[42px] text-[#0a0a0a] leading-[1.15] mb-8 font-light"
+            style={{ fontFamily: "var(--font-serif)" }}
+          >
+            {product.title}
+          </h2>
+
+          <p className="text-[12px] md:text-[13px] leading-[2] text-[#6a6a6a] tracking-[0.02em] max-w-[620px] mx-auto">
+            {product.description}
+          </p>
+
+          {shop && (
+            <p className="text-[9px] tracking-[0.3em] text-[#9a9a9a] mt-10 uppercase">
+              — {shop.shopName},{" "}
+              {shop.address?.split(",").slice(-2).join(",").trim()}
+            </p>
+          )}
+
+          {/* Decorative line */}
+          <div className="w-8 h-px bg-[#d8d6d3] mx-auto mt-10" />
+        </div>
       </section>
 
-      {/* ── Attributes grid ───────────────────────────────────────────── */}
+      {/* ── Attributes — Elegant horizontal strip ─────────────────── */}
       {displayAttributes.length > 0 && (
-        <section className="border-t border-[#e0e0e0] py-10 px-6 max-w-[1200px] mx-auto">
-          <div
-            className="grid gap-8"
-            style={{
-              gridTemplateColumns: `repeat(${Math.min(displayAttributes.length, 4)}, 1fr)`,
-            }}
-          >
-            {displayAttributes.map((attr) => (
-              <div key={attr.id} className="text-center">
-                <p className="text-[8px] tracking-[0.25em] text-[#8a8a8a] uppercase mb-2">
-                  {attr.label}
-                </p>
-                <p className="text-[11px] tracking-[0.1em] text-[#0a0a0a] font-medium uppercase">
-                  {attr.value}
-                  {/* Unit hint for number types */}
-                </p>
+        <section className="max-w-[1400px] mx-auto px-6 py-16 md:py-20">
+          <div className="flex items-center justify-center">
+            {displayAttributes.map((attr, i) => (
+              <div key={attr.id} className="flex items-center">
+                <div className="text-center px-8 md:px-14">
+                  <p className="text-[8px] tracking-[0.3em] text-[#9a9a9a] uppercase mb-2.5">
+                    {attr.label}
+                  </p>
+                  <p className="text-[12px] tracking-[0.1em] text-[#0a0a0a] font-medium">
+                    {attr.value}
+                  </p>
+                </div>
+                {/* Vertical divider between attributes */}
+                {i < displayAttributes.length - 1 && (
+                  <div className="w-px h-10 bg-[#e0deda]" />
+                )}
               </div>
             ))}
           </div>
         </section>
       )}
 
-      {/* ── Artisan section ───────────────────────────────────────────── */}
+      {/* ── Artisan Section — Editorial layout ────────────────────── */}
       {artisan && (
-        <section className="border-t border-[#e0e0e0]">
+        <section className="border-t border-[#e8e6e3]">
           <div className="grid grid-cols-1 md:grid-cols-2">
-            {/* Placeholder artisan/atelier image — replace with real photo when available */}
-            <div className="relative min-h-[360px] bg-[#c8c4bd]">
-              <div className="absolute inset-0 bg-gradient-to-br from-[#b8b4ad] to-[#a0998e]" />
-              {/* Decorative texture overlay */}
-              <div
-                className="absolute inset-0 opacity-10"
-                style={{
-                  backgroundImage:
-                    "repeating-linear-gradient(45deg, #0a0a0a 0, #0a0a0a 1px, transparent 0, transparent 50%)",
-                  backgroundSize: "8px 8px",
-                }}
-              />
-            </div>
-
-            {/* Artisan bio */}
-            <div className="flex flex-col justify-center px-8 md:px-14 py-14">
-              <p className="text-[9px] tracking-[0.3em] text-[#8a8a8a] uppercase mb-4">
-                THE ARTISAN
+            {/* Artisan bio — left side */}
+            <div className="flex flex-col justify-center px-8 md:px-20 py-16 md:py-24 order-2 md:order-1">
+              <p className="text-[9px] tracking-[0.4em] text-[#9a9a9a] uppercase mb-6">
+                The Artisan
               </p>
+
               <h3
-                className="text-2xl md:text-3xl text-[#0a0a0a] italic mb-5 leading-snug"
+                className="text-3xl md:text-4xl text-[#0a0a0a] mb-7 leading-[1.15] font-light"
                 style={{ fontFamily: "var(--font-serif)" }}
               >
-                Meet {artisan.fullName}
+                {artisan.fullName}
               </h3>
+
               {shop?.description ? (
-                <p className="text-[11px] leading-relaxed text-[#5a5a5a] tracking-wide mb-7 max-w-sm">
-                  {shop.description.slice(0, 300)}
-                  {shop.description.length > 300 ? "..." : ""}
-                </p>
+                <div className="mb-9">
+                  {/* Pull quote style */}
+                  <div className="border-l-2 border-[#e0deda] pl-6">
+                    <p
+                      className="text-[15px] leading-[1.7] text-[#5a5a5a] italic mb-4"
+                      style={{ fontFamily: "var(--font-serif)" }}
+                    >
+                      &ldquo;
+                      {shop.description.slice(0, 150)}
+                      {shop.description.length > 150 ? "..." : ""}
+                      &rdquo;
+                    </p>
+                  </div>
+                  {shop.description.length > 150 && (
+                    <p className="text-[11px] leading-[1.8] text-[#6a6a6a] tracking-[0.02em] mt-5 max-w-sm">
+                      {shop.description.slice(150, 400)}
+                      {shop.description.length > 400 ? "..." : ""}
+                    </p>
+                  )}
+                </div>
               ) : (
-                <p className="text-[11px] leading-relaxed text-[#5a5a5a] tracking-wide mb-7 max-w-sm">
+                <p className="text-[11px] leading-[1.8] text-[#6a6a6a] tracking-[0.02em] mb-9 max-w-sm">
                   A master craftsperson with generations of expertise, dedicated
                   to preserving the art forms of their region.
                 </p>
               )}
+
               <Link
                 href={`/shop/atelier/${artisan.id}`}
-                className="text-[10px] tracking-[0.2em] text-[#0a0a0a] border-b border-[#0a0a0a] pb-0.5 hover:opacity-60 transition-opacity self-start"
+                className="inline-flex items-center gap-2 text-[10px] tracking-[0.22em] text-[#0a0a0a] uppercase group self-start"
               >
-                VIEW ATELIER
+                <span className="border-b border-[#0a0a0a] pb-0.5 group-hover:opacity-60 transition-opacity">
+                  View Atelier
+                </span>
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  className="transition-transform duration-300 group-hover:translate-x-1"
+                >
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
               </Link>
+            </div>
+
+            {/* Artisan image placeholder — right side */}
+            <div className="relative min-h-[420px] md:min-h-[560px] bg-[#eae8e4] order-1 md:order-2 overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-[#ddd9d3] to-[#c8c3bb]" />
+              {/* Subtle textile texture */}
+              <div
+                className="absolute inset-0 opacity-[0.06]"
+                style={{
+                  backgroundImage:
+                    "repeating-linear-gradient(45deg, #0a0a0a 0, #0a0a0a 1px, transparent 0, transparent 50%)",
+                  backgroundSize: "6px 6px",
+                }}
+              />
+              {/* Centered label */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <p className="text-[10px] tracking-[0.3em] text-[#9a9a9a] uppercase">
+                  Atelier Portrait
+                </p>
+              </div>
             </div>
           </div>
         </section>
       )}
 
-      {/* ── Authenticity Chain ────────────────────────────────────────── */}
-      <section className="border-t border-[#e0e0e0] py-14 px-6">
-        <div className="max-w-[1200px] mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
-            <div>
-              <h3 className="text-xl md:text-2xl tracking-[0.08em] text-[#0a0a0a] uppercase font-light mb-4">
-                Authenticity Chain
-              </h3>
-              <p className="text-[11px] leading-relaxed text-[#5a5a5a] tracking-wide max-w-sm">
-                This item is physically tagged with a unique GI code, traceable
-                to the Kashmir region. We maintain a blockchain-verified
-                certificate to ensure the provenance of your piece remains
-                immutable.
-              </p>
-            </div>
-            <div className="flex flex-col items-center justify-center py-8 border border-[#e0e0e0]">
+      {/* ── Authenticity Chain — Centered certification display ────── */}
+      <section className="bg-[#faf9f7]">
+        <div className="max-w-[800px] mx-auto px-6 py-20 md:py-24">
+          <div className="text-center">
+            <p className="text-[9px] tracking-[0.4em] text-[#9a9a9a] uppercase mb-10">
+              Authenticity & Provenance
+            </p>
+
+            {/* Certification badge */}
+            <div className="inline-flex flex-col items-center border border-[#e0deda] px-16 py-12">
               <svg
-                width="32"
-                height="32"
+                width="36"
+                height="36"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="#0a0a0a"
-                strokeWidth="1"
-                className="mb-3 opacity-30"
+                strokeWidth="0.8"
+                className="mb-5 opacity-40"
               >
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
               </svg>
+
               {product.giCertUrl ? (
                 <>
-                  <p className="text-[10px] tracking-[0.2em] text-[#0a0a0a] font-medium">
-                    GI CERTIFIED
+                  <p className="text-[11px] tracking-[0.25em] text-[#0a0a0a] font-medium uppercase">
+                    GI Certified
                   </p>
-                  <p className="text-[9px] tracking-[0.15em] text-[#8a8a8a] mt-1">
-                    AUTHENTICITY VERIFIED
+                  <p className="text-[9px] tracking-[0.2em] text-[#9a9a9a] mt-2 uppercase">
+                    Authenticity Verified
                   </p>
                 </>
               ) : (
                 <>
-                  <p className="text-[10px] tracking-[0.2em] text-[#8a8a8a]">
-                    CRAFTSMAN AUTHENTICATED
+                  <p className="text-[11px] tracking-[0.25em] text-[#8a8a8a] uppercase">
+                    Craftsman Authenticated
                   </p>
-                  <p className="text-[9px] tracking-[0.15em] text-[#b0b0b0] mt-1">
-                    GI CERTIFICATE PENDING
+                  <p className="text-[9px] tracking-[0.2em] text-[#b0b0b0] mt-2 uppercase">
+                    GI Certificate Pending
                   </p>
                 </>
               )}
             </div>
+
+            <p className="text-[11px] leading-[1.9] text-[#6a6a6a] tracking-[0.02em] max-w-[480px] mx-auto mt-10">
+              Each piece is physically tagged with a unique GI code, traceable
+              to its region of origin. We maintain blockchain-verified
+              certificates ensuring the provenance of your piece remains
+              immutable.
+            </p>
           </div>
         </div>
       </section>
 
-      {/* ── You may also like ─────────────────────────────────────────── */}
+      {/* ── You May Also Like ─────────────────────────────────────── */}
       {relatedProducts.length > 0 && (
-        <section className="border-t border-[#e0e0e0] py-12 px-6 max-w-[1200px] mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="text-[11px] tracking-[0.25em] text-[#0a0a0a] uppercase">
+        <section className="border-t border-[#e8e6e3] py-16 md:py-20 px-6 max-w-[1400px] mx-auto">
+          <div className="flex items-center justify-between mb-12">
+            <h3
+              className="text-xl md:text-2xl tracking-[0.02em] text-[#0a0a0a] font-light"
+              style={{ fontFamily: "var(--font-serif)" }}
+            >
               You May Also Like
             </h3>
             {product.category && (
               <Link
                 href={`/shop/${product.category.slug}`}
-                className="text-[9px] tracking-[0.2em] text-[#8a8a8a] hover:text-[#0a0a0a] transition-colors"
+                className="text-[9px] tracking-[0.22em] text-[#9a9a9a] uppercase hover:text-[#0a0a0a] transition-colors"
               >
-                VIEW ALL
+                View All
               </Link>
             )}
           </div>
 
-          {/* Horizontal scroll on mobile, 4-col grid on desktop */}
-          <div className="flex gap-4 md:grid md:grid-cols-4 overflow-x-auto pb-4 md:pb-0 md:overflow-visible">
+          <div className="flex gap-5 md:grid md:grid-cols-4 md:gap-8 overflow-x-auto pb-4 md:pb-0 md:overflow-visible">
             {relatedProducts.map((p) => (
               <RelatedCard key={p.id} product={p} />
             ))}
