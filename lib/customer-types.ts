@@ -66,3 +66,40 @@ export interface OrdersListResponse {
   limit: number;
   totalPages: number;
 }
+
+/* ── Cart ────────────────────────────────────────────────── */
+
+export interface CartItemProduct {
+  id: string;
+  title: string;
+  status: string;
+  isMadeToOrder: boolean;
+  leadTimeDays: number | null;
+  images: { id: string; url: string }[];
+}
+
+export interface CartItemVariant {
+  id: string;
+  label: string;
+  price: number;
+  stock: number;
+}
+
+export interface CartItem {
+  id: string;
+  cartId: string;
+  productId: string;
+  variantId: string | null;
+  quantity: number;
+  product: CartItemProduct;
+  variant: CartItemVariant | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Cart {
+  id: string;
+  customerId: string;
+  items: CartItem[];
+  total: number;
+}

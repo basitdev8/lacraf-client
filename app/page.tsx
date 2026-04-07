@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import StoreHeader from "@/components/store/store-header";
 import HeroCarousel from "@/components/store/hero-carousel";
+import { ShopProviders } from "./shop/providers";
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api/v1";
@@ -78,6 +79,7 @@ export default async function HomePage() {
   ]);
 
   return (
+    <ShopProviders>
     <div className="min-h-screen bg-white">
       {/* ── Header ── */}
       <StoreHeader categories={categories} />
@@ -403,5 +405,6 @@ export default async function HomePage() {
         </p>
       </footer>
     </div>
+    </ShopProviders>
   );
 }

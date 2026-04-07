@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useCart } from "@/context/cart-context";
+import { useRouter } from "next/navigation";
 
 interface Variant {
   id: string;
@@ -85,6 +87,9 @@ export default function ProductPurchasePanel({
   isMadeToOrder,
   leadTimeDays,
 }: ProductPurchasePanelProps) {
+  const { addItem, setDrawerOpen } = useCart();
+  const router = useRouter();
+
   const defaultVariant =
     variants.find((v) => v.isDefault) ?? variants[0] ?? null;
   const [selectedVariant, setSelectedVariant] = useState<Variant | null>(
@@ -92,6 +97,7 @@ export default function ProductPurchasePanel({
   );
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
+  const [adding, setAdding] = useState(false);
   const [wishlisted, setWishlisted] = useState(false);
 
   const rawPrice = selectedVariant ? Number(selectedVariant.price) : null;
@@ -99,16 +105,29 @@ export default function ProductPurchasePanel({
   const inStock = selectedVariant ? selectedVariant.stock > 0 : false;
   const maxQty = selectedVariant ? Math.min(selectedVariant.stock, 10) : 1;
 
-  function handleAddToBag() {
-    if (!selectedVariant || !inStock) return;
-    // TODO: Integrate with customer cart API
-    // POST /api/v1/cart/items { productId, variantId, quantity }
-    setAdded(true);
-    setTimeout(() => setAdded(false), 2000);
+  async function handleAddToBag() {
+    if (!selectedVariant || !inStock || adding) return;
+
+    const token = localStorage.getItem("customerAccessToken");
+    if (!token) {
+      router.push("/account/login");
+      return;
+    }
+
+    try {
+      setAdding(true);
+      await addItem(productId, selectedVariant.id, quantity);
+      setAdded(true);
+      setDrawerOpen(true);
+      setTimeout(() => setAdded(false), 2000);
+    } catch {
+      // Error is handled silently — user sees the button revert
+    } finally {
+      setAdding(false);
+    }
   }
 
   // Suppress unused variable warning
-  void productId;
   void artisanId;
 
   return (
@@ -254,7 +273,13 @@ export default function ProductPurchasePanel({
             disabled:opacity-25 disabled:cursor-not-allowed
           `}
         >
-          {added ? "Added to Bag" : !inStock ? "Out of Stock" : "Add to Bag"}
+          {added
+            ? "Added to Bag"
+            : adding
+              ? "Adding..."
+              : !inStock
+                ? "Out of Stock"
+                : "Add to Bag"}
         </button>
         <button
           onClick={() => setWishlisted((w) => !w)}

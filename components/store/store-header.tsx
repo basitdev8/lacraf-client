@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect, useRef, useCallback } from "react";
 import type { StoreCategory } from "@/app/shop/layout";
+import { useCart } from "@/context/cart-context";
+import CartDrawer from "./cart-drawer";
 
 /* ── Nav items with subcategory mapping ───────────────── */
 const NAV_ITEMS = [
@@ -34,6 +36,7 @@ export default function StoreHeader({
 }: StoreHeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const { itemCount, setDrawerOpen } = useCart();
 
   const [scrolled, setScrolled] = useState(false);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
@@ -221,7 +224,8 @@ export default function StoreHeader({
               ACCOUNT
             </Link>
             <button
-              className={`flex items-center gap-1.5 text-[10px] tracking-[0.2em] ${textColor} hover:opacity-50 transition-opacity`}
+              onClick={() => setDrawerOpen(true)}
+              className={`flex items-center gap-1.5 text-[10px] tracking-[0.2em] ${textColor} hover:opacity-50 transition-opacity relative`}
             >
               <svg
                 width="13"
@@ -236,6 +240,11 @@ export default function StoreHeader({
                 <path d="M16 10a4 4 0 0 1-8 0" />
               </svg>
               BAG
+              {itemCount > 0 && (
+                <span className="absolute -top-1.5 -right-2.5 bg-[#0a0a0a] text-white text-[8px] w-4 h-4 rounded-full flex items-center justify-center leading-none">
+                  {itemCount > 9 ? "9+" : itemCount}
+                </span>
+              )}
             </button>
           </div>
         </div>
@@ -384,6 +393,9 @@ export default function StoreHeader({
           }}
         />
       )}
+
+      {/* Cart drawer */}
+      <CartDrawer />
     </>
   );
 }

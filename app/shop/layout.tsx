@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import StoreHeader from "@/components/store/store-header";
+import { ShopProviders } from "./providers";
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api/v1";
@@ -41,6 +42,7 @@ export default async function ShopLayout({
   const categories = await fetchCategories();
 
   return (
+    <ShopProviders>
     <div className="min-h-screen bg-white">
       <StoreHeader categories={categories} />
       <main>{children}</main>
@@ -135,5 +137,6 @@ export default async function ShopLayout({
         </p>
       </footer>
     </div>
+    </ShopProviders>
   );
 }
