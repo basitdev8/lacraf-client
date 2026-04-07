@@ -3,7 +3,8 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { TrustBadge, CertBadge } from "@/components/store/trust-badge";
 import { StarDisplay } from "@/components/store/star-display";
-import { ReviewList, ReviewItem } from "@/components/artisan/review-list";
+import type { ReviewItem } from "@/components/artisan/review-list";
+import { ArtisanReviewSection } from "@/components/artisan/artisan-review-section";
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api/v1";
@@ -215,25 +216,14 @@ export default async function ArtisanProfilePage({
         </section>
       )}
 
-      {/* ── Reviews ───────────────────────────────────────────────── */}
-      <section>
-        <div className="flex items-baseline justify-between mb-8">
-          <p className="text-[9px] tracking-[0.4em] text-[#9a9a9a] uppercase">
-            Customer Reviews
-            {artisan.reviewCount > 0 && (
-              <span className="ml-2 text-[#b0b0b0]">({artisan.reviewCount})</span>
-            )}
-          </p>
-          {!artisan.isUnrated && artisan.averageRating != null && (
-            <StarDisplay rating={artisan.averageRating} count={artisan.reviewCount} showCount size="sm" />
-          )}
-        </div>
-        <ReviewList
-          artisanId={artisan.id}
-          initialReviews={artisan.reviews}
-          initialTotal={artisan.reviewCount}
-        />
-      </section>
+      {/* ── Reviews + submission gate ─────────────────────────────── */}
+      <ArtisanReviewSection
+        artisanId={artisan.id}
+        initialReviews={artisan.reviews}
+        initialTotal={artisan.reviewCount}
+        isUnrated={artisan.isUnrated}
+        averageRating={artisan.averageRating}
+      />
     </div>
   );
 }
