@@ -5,6 +5,9 @@ import type { Metadata } from "next";
 import ProductImageGallery from "@/components/store/product-image-gallery";
 import ProductPurchasePanel from "@/components/store/product-purchase-panel";
 import { StorefrontProduct } from "@/components/store/product-grid";
+import { TrustBadge, CertBadge } from "@/components/store/trust-badge";
+import { StarDisplay } from "@/components/store/star-display";
+import { ReviewList, ReviewItem } from "@/components/artisan/review-list";
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api/v1";
@@ -44,6 +47,14 @@ interface FullProduct extends StorefrontProduct {
       description: string;
       address: string;
     } | null;
+    trustScore?: number | null;
+    trustTier?: "NONE" | "BRONZE" | "SILVER" | "GOLD" | null;
+    isUnrated?: boolean;
+    reviewCount?: number;
+    averageRating?: number | null;
+    businessCertApproved?: boolean;
+    govRecognizedApproved?: boolean;
+    reviews?: ReviewItem[];
   } | null;
 }
 
@@ -288,11 +299,45 @@ export default async function ProductDetailPage({
               </p>
 
               <h3
-                className="text-3xl md:text-4xl text-[#0a0a0a] mb-7 leading-[1.15] font-light"
+                className="text-3xl md:text-4xl text-[#0a0a0a] mb-4 leading-[1.15] font-light"
                 style={{ fontFamily: "var(--font-serif)" }}
               >
                 {artisan.fullName}
               </h3>
+
+              {/* Trust score + tier badge */}
+              <div className="flex items-center flex-wrap gap-2 mb-4">
+                <TrustBadge tier={artisan.trustTier ?? "NONE"} size="md" />
+                {artisan.businessCertApproved && (
+                  <CertBadge type="business" size="md" />
+                )}
+                {artisan.govRecognizedApproved && (
+                  <CertBadge type="gov" size="md" />
+                )}
+              </div>
+              <div className="flex items-center gap-3 mb-7">
+                {artisan.isUnrated ? (
+                  <span className="text-[9px] tracking-[0.15em] text-[#9a9a9a] uppercase">
+                    Unrated
+                  </span>
+                ) : (
+                  <>
+                    {artisan.trustScore != null && (
+                      <span className="text-[11px] tracking-[0.08em] text-[#3a3a3a]">
+                        {(artisan.trustScore / 10).toFixed(1)} / 10
+                      </span>
+                    )}
+                    {artisan.averageRating != null && artisan.reviewCount != null && (
+                      <StarDisplay
+                        rating={artisan.averageRating}
+                        count={artisan.reviewCount}
+                        showCount
+                        size="sm"
+                      />
+                    )}
+                  </>
+                )}
+              </div>
 
               {shop?.description ? (
                 <div className="mb-9">
@@ -363,6 +408,25 @@ export default async function ProductDetailPage({
               </div>
             </div>
           </div>
+        </section>
+      )}
+
+      {/* ── Customer Reviews ──────────────────────────────────────── */}
+      {artisan && (
+        <section className="max-w-[900px] mx-auto px-6 py-16 md:py-20">
+          <div className="flex items-baseline justify-between mb-8">
+            <p className="text-[9px] tracking-[0.4em] text-[#9a9a9a] uppercase">
+              Customer Reviews
+            </p>
+            {!artisan.isUnrated && artisan.averageRating != null && artisan.reviewCount != null && (
+              <StarDisplay rating={artisan.averageRating} count={artisan.reviewCount} showCount size="sm" />
+            )}
+          </div>
+          <ReviewList
+            artisanId={artisan.id}
+            initialReviews={artisan.reviews ?? []}
+            initialTotal={artisan.reviewCount ?? 0}
+          />
         </section>
       )}
 

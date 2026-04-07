@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { TrustBadge } from "@/components/store/trust-badge";
+import { StarDisplay } from "@/components/store/star-display";
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api/v1";
@@ -30,6 +32,13 @@ export interface StorefrontProduct {
   artisan: {
     id: string;
     shop: { shopName: string } | null;
+    trustScore?: number | null;
+    trustTier?: "NONE" | "BRONZE" | "SILVER" | "GOLD" | null;
+    isUnrated?: boolean;
+    reviewCount?: number;
+    averageRating?: number | null;
+    businessCertApproved?: boolean;
+    govRecognizedApproved?: boolean;
   } | null;
 }
 
@@ -46,10 +55,16 @@ async function fetchStorefrontProducts(params: {
   subcategoryId?: string;
   page: number;
   limit: number;
+  trustTier?: string;
+  sort?: string;
+  order?: string;
 }): Promise<ProductsResponse> {
   const qs = new URLSearchParams();
   if (params.categoryId) qs.set("categoryId", params.categoryId);
   if (params.subcategoryId) qs.set("subcategoryId", params.subcategoryId);
+  if (params.trustTier) qs.set("trustTier", params.trustTier);
+  if (params.sort) qs.set("sort", params.sort);
+  if (params.order) qs.set("order", params.order);
   qs.set("page", String(params.page));
   qs.set("limit", String(params.limit));
 
@@ -90,6 +105,7 @@ function ProductCard({ product }: { product: StorefrontProduct }) {
   const imageUrl = product.images?.[0]?.secureUrl ?? null;
   const price = getDefaultPrice(product.variants);
   const shopName = product.artisan?.shop?.shopName;
+  const artisan = product.artisan;
 
   return (
     <Link href={`/shop/product/${product.id}`} className="group block">
@@ -128,6 +144,23 @@ function ProductCard({ product }: { product: StorefrontProduct }) {
             {formatPrice(price)}
           </p>
         )}
+        {/* Trust tier badge + star rating */}
+        {artisan && (
+          <div className="flex items-center gap-2 pt-0.5 flex-wrap">
+            <TrustBadge tier={artisan.trustTier ?? "NONE"} size="sm" />
+            {!artisan.isUnrated &&
+              artisan.averageRating != null &&
+              artisan.reviewCount != null &&
+              artisan.reviewCount > 0 && (
+                <StarDisplay
+                  rating={artisan.averageRating}
+                  count={artisan.reviewCount}
+                  showCount
+                  size="sm"
+                />
+              )}
+          </div>
+        )}
       </div>
     </Link>
   );
@@ -148,11 +181,14 @@ function ProductSkeleton() {
 interface ProductGridProps {
   categoryId?: string;
   subcategoryId?: string;
+  trustTier?: string;
+  sort?: string;
+  order?: string;
 }
 
 const PAGE_SIZE = 12;
 
-export default function ProductGrid({ categoryId, subcategoryId }: ProductGridProps) {
+export default function ProductGrid({ categoryId, subcategoryId, trustTier, sort, order }: ProductGridProps) {
   const [products, setProducts] = useState<StorefrontProduct[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -167,6 +203,9 @@ export default function ProductGrid({ categoryId, subcategoryId }: ProductGridPr
       const result = await fetchStorefrontProducts({
         categoryId,
         subcategoryId,
+        trustTier,
+        sort,
+        order,
         page: pageNum,
         limit: PAGE_SIZE,
       });
@@ -180,7 +219,7 @@ export default function ProductGrid({ categoryId, subcategoryId }: ProductGridPr
       if (replace) setLoading(false);
       else setLoadingMore(false);
     },
-    [categoryId, subcategoryId]
+    [categoryId, subcategoryId, trustTier, sort, order]
   );
 
   useEffect(() => {

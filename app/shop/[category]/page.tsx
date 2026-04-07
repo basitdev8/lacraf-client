@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import type { StoreCategory } from "@/app/shop/layout";
 import SubcategoryTabs from "@/components/store/subcategory-tabs";
 import ProductGrid from "@/components/store/product-grid";
+import TrustFilterPills from "@/components/store/trust-filter-pills";
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api/v1";
@@ -77,10 +78,10 @@ export default async function CategoryPage({
   searchParams,
 }: {
   params: Promise<{ category: string }>;
-  searchParams: Promise<{ sub?: string }>;
+  searchParams: Promise<{ sub?: string; trustTier?: string }>;
 }) {
   const { category } = await params;
-  const { sub } = await searchParams;
+  const { sub, trustTier } = await searchParams;
 
   if (!VALID_CATEGORY_SLUGS.includes(category)) {
     notFound();
@@ -153,10 +154,11 @@ export default async function CategoryPage({
           </p>
         </div>
 
-        <button className="flex items-center gap-2 text-[10px] tracking-[0.2em] text-[#0a0a0a] hover:opacity-60 transition-opacity mt-1">
-          <FilterIcon />
-          Filter
-        </button>
+        <div className="flex items-center gap-3 mt-1">
+          <Suspense fallback={null}>
+            <TrustFilterPills activeTier={trustTier ?? ""} />
+          </Suspense>
+        </div>
       </div>
 
       {/* Subcategory tabs */}
@@ -187,7 +189,7 @@ export default async function CategoryPage({
           </div>
         }
       >
-        <ProductGrid categoryId={categoryId} subcategoryId={subcategoryId} />
+        <ProductGrid categoryId={categoryId} subcategoryId={subcategoryId} trustTier={trustTier} />
       </Suspense>
     </div>
   );
