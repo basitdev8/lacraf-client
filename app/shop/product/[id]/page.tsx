@@ -20,7 +20,6 @@ interface FullProduct extends StorefrontProduct {
   giCertUrl: string | null;
   giCertPublicId: string | null;
   productType: ProductType;
-  productionStage: string | null;
   supplierType: string;
   craftJourney?: CraftJourneyStage[];
   supplyChainOutput?: SupplyChainLink[];
