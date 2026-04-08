@@ -1524,6 +1524,9 @@ export default function NewProductPage() {
                 variants: [],
                 uploadedImages: [],
                 imageFiles: [],
+                productType: "FINISHED",
+                productionStage: "",
+                supplierType: "B2C",
               });
             }}
             className="btn-outline"
