@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { name: "HANDLOOMS", slug: "handloom" },
   { name: "HANDICRAFTS", slug: "handicraft" },
   { name: "THE ATELIER", slug: "edibles" },
+  { name: "RAW MATERIALS", slug: "raw-materials" },
   { name: "GIFTS", slug: "gifts", comingSoon: true },
 ];
 

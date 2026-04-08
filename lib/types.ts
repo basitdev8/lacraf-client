@@ -99,12 +99,62 @@ export interface ProductVariant {
 }
 
 export type ProductStatus = "DRAFT" | "UNDER_REVIEW" | "APPROVED" | "REJECTED";
+export type ProductType = "FINISHED" | "RAW" | "SEMI_FINISHED";
+export type ProductionStage =
+  | "WOOL_COLLECTION"
+  | "CLEANING"
+  | "SPINNING"
+  | "WEAVING"
+  | "DYEING"
+  | "EMBROIDERY"
+  | "FINISHING"
+  | "OTHER";
+export type SupplierType = "B2C" | "B2B" | "BOTH";
+
+export interface CraftJourneyStage {
+  id: string;
+  stageOrder: number;
+  stageName: string;
+  productionStage: ProductionStage;
+  contributionNote: string | null;
+  artisan: {
+    id: string;
+    fullName: string;
+    artisanRole: string | null;
+    shop: { shopName: string } | null;
+  } | null;
+  inputProduct: {
+    id: string;
+    title: string;
+    productType: ProductType;
+    productionStage: ProductionStage | null;
+    images: ProductImage[];
+  } | null;
+}
+
+export interface SupplyChainLink {
+  id: string;
+  finishedProduct: {
+    id: string;
+    title: string;
+    status: ProductStatus;
+    images: ProductImage[];
+    artisan: {
+      id: string;
+      fullName: string;
+      shop: { shopName: string } | null;
+    };
+  };
+}
 
 export interface Product {
   id: string;
   title: string;
   description: string;
   status: ProductStatus;
+  productType: ProductType;
+  productionStage: ProductionStage | null;
+  supplierType: SupplierType;
   rejectionReason: string | null;
   categoryId: string;
   subcategoryId: string;

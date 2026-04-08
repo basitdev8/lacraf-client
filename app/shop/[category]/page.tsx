@@ -73,15 +73,22 @@ function FilterIcon() {
 }
 
 // ── Page ───────────────────────────────────────────────────────────────────
+const PRODUCT_TYPE_TABS = [
+  { label: "All", value: "" },
+  { label: "Finished Goods", value: "FINISHED" },
+  { label: "Raw Materials", value: "RAW" },
+  { label: "Semi-Finished", value: "SEMI_FINISHED" },
+];
+
 export default async function CategoryPage({
   params,
   searchParams,
 }: {
   params: Promise<{ category: string }>;
-  searchParams: Promise<{ sub?: string; trustTier?: string }>;
+  searchParams: Promise<{ sub?: string; trustTier?: string; productType?: string }>;
 }) {
   const { category } = await params;
-  const { sub, trustTier } = await searchParams;
+  const { sub, trustTier, productType } = await searchParams;
 
   if (!VALID_CATEGORY_SLUGS.includes(category)) {
     notFound();
@@ -163,7 +170,7 @@ export default async function CategoryPage({
 
       {/* Subcategory tabs */}
       {categoryData && categoryData.subcategories.length > 0 && (
-        <div className="mb-8">
+        <div className="mb-6">
           <Suspense fallback={null}>
             <SubcategoryTabs
               subcategories={categoryData.subcategories}
@@ -172,6 +179,30 @@ export default async function CategoryPage({
           </Suspense>
         </div>
       )}
+
+      {/* Product type filter tabs */}
+      <div className="flex gap-1 mb-8 flex-wrap">
+        {PRODUCT_TYPE_TABS.map((tab) => {
+          const href =
+            tab.value === ""
+              ? `/shop/${category}${sub ? `?sub=${sub}` : ""}${trustTier ? `${sub ? "&" : "?"}trustTier=${trustTier}` : ""}`
+              : `/shop/${category}?${sub ? `sub=${sub}&` : ""}productType=${tab.value}${trustTier ? `&trustTier=${trustTier}` : ""}`;
+          const isActive = (productType ?? "") === tab.value;
+          return (
+            <Link
+              key={tab.value}
+              href={href}
+              className={`text-[9px] tracking-[0.15em] px-4 py-1.5 border transition-colors ${
+                isActive
+                  ? "border-[#0a0a0a] bg-[#0a0a0a] text-white"
+                  : "border-[#e0e0e0] text-[#6a6a6a] hover:border-[#0a0a0a] hover:text-[#0a0a0a]"
+              }`}
+            >
+              {tab.label.toUpperCase()}
+            </Link>
+          );
+        })}
+      </div>
 
       {/* Product grid */}
       <Suspense
@@ -189,7 +220,12 @@ export default async function CategoryPage({
           </div>
         }
       >
-        <ProductGrid categoryId={categoryId} subcategoryId={subcategoryId} trustTier={trustTier} />
+        <ProductGrid
+          categoryId={categoryId}
+          subcategoryId={subcategoryId}
+          trustTier={trustTier}
+          productType={productType}
+        />
       </Suspense>
     </div>
   );

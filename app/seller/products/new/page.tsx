@@ -36,6 +36,10 @@ interface FormState {
   variants: VariantDraft[];
   uploadedImages: { id: string; url: string }[];
   imageFiles: File[];
+  // Supply chain fields
+  productType: "FINISHED" | "RAW" | "SEMI_FINISHED";
+  productionStage: string;
+  supplierType: "B2C" | "B2B" | "BOTH";
 }
 
 // ─── Step Indicator ───────────────────────────────────────────────────────────
@@ -409,6 +413,9 @@ function DetailsStep({
 }) {
   const [title, setTitle] = useState(form.title);
   const [description, setDescription] = useState(form.description);
+  const [productType, setProductType] = useState<"FINISHED" | "RAW" | "SEMI_FINISHED">(form.productType);
+  const [productionStage, setProductionStage] = useState(form.productionStage);
+  const [supplierType, setSupplierType] = useState<"B2C" | "B2B" | "BOTH">(form.supplierType);
   const [attrValues, setAttrValues] = useState<Record<string, string>>(() => {
     const init: Record<string, string> = {};
     form.attributes.forEach((a) => {
@@ -493,6 +500,12 @@ function DetailsStep({
     setSaving(true);
     try {
       let productId: string;
+      const supplyChainPayload = {
+        productType,
+        supplierType,
+        ...(productType !== "FINISHED" && productionStage ? { productionStage } : {}),
+      };
+
       if (form.productId) {
         // Update existing draft — keep the same id
         await api.patch(`/products/${form.productId}`, {
@@ -501,6 +514,7 @@ function DetailsStep({
           categoryId: form.categoryId,
           subcategoryId: form.subcategoryId,
           attributes,
+          ...supplyChainPayload,
         });
         productId = form.productId;
       } else {
@@ -513,12 +527,13 @@ function DetailsStep({
             categoryId: form.categoryId,
             subcategoryId: form.subcategoryId,
             attributes,
+            ...supplyChainPayload,
           }
         );
         productId = result.product.id;
       }
       onNext(
-        { title: title.trim(), description: description.trim(), attributes },
+        { title: title.trim(), description: description.trim(), attributes, productType, productionStage, supplierType },
         productId
       );
     } catch (e) {
@@ -611,6 +626,79 @@ function DetailsStep({
             <p className="mt-1 text-right text-xs text-muted">
               {description.length}/2000
             </p>
+          </div>
+
+          {/* ── Supply Chain Classification ─────────────────────────────── */}
+          <div className="rounded-xl border border-border bg-[#faf9f7] p-4 space-y-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted mb-1">
+                Supply Chain Classification
+              </p>
+              <p className="text-xs text-muted">
+                Tell buyers where this product sits in the Kashmiri craft supply chain.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {/* Product Type */}
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-muted uppercase tracking-wider">
+                  Product Type *
+                </label>
+                <select
+                  className="input-underline"
+                  value={productType}
+                  onChange={(e) => {
+                    setProductType(e.target.value as "FINISHED" | "RAW" | "SEMI_FINISHED");
+                    if (e.target.value === "FINISHED") setProductionStage("");
+                  }}
+                >
+                  <option value="FINISHED">Finished Good — ready for end customer</option>
+                  <option value="RAW">Raw Material — unprocessed input</option>
+                  <option value="SEMI_FINISHED">Semi-Finished — partially processed</option>
+                </select>
+              </div>
+
+              {/* Supplier Type */}
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-muted uppercase tracking-wider">
+                  Sold To *
+                </label>
+                <select
+                  className="input-underline"
+                  value={supplierType}
+                  onChange={(e) => setSupplierType(e.target.value as "B2C" | "B2B" | "BOTH")}
+                >
+                  <option value="B2C">Customers only (B2C)</option>
+                  <option value="B2B">Other artisans only (B2B)</option>
+                  <option value="BOTH">Both customers &amp; artisans</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Production Stage — only relevant for raw / semi-finished */}
+            {productType !== "FINISHED" && (
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-muted uppercase tracking-wider">
+                  Production Stage
+                </label>
+                <select
+                  className="input-underline"
+                  value={productionStage}
+                  onChange={(e) => setProductionStage(e.target.value)}
+                >
+                  <option value="">Select stage…</option>
+                  <option value="WOOL_COLLECTION">Wool Collection</option>
+                  <option value="CLEANING">Cleaning &amp; Refining</option>
+                  <option value="SPINNING">Hand Spinning</option>
+                  <option value="WEAVING">Weaving</option>
+                  <option value="DYEING">Natural Dyeing</option>
+                  <option value="EMBROIDERY">Embroidery</option>
+                  <option value="FINISHING">Finishing</option>
+                  <option value="OTHER">Other</option>
+                </select>
+              </div>
+            )}
           </div>
 
           {/* Dynamic attributes */}
@@ -1383,6 +1471,9 @@ export default function NewProductPage() {
     variants: [],
     uploadedImages: [],
     imageFiles: [],
+    productType: "FINISHED",
+    productionStage: "",
+    supplierType: "B2C",
   });
   const [done, setDone] = useState<{ published: boolean } | null>(null);
 

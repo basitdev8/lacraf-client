@@ -8,6 +8,8 @@ import { StorefrontProduct } from "@/components/store/product-grid";
 import { TrustBadge, CertBadge } from "@/components/store/trust-badge";
 import { StarDisplay } from "@/components/store/star-display";
 import { ReviewList, ReviewItem } from "@/components/artisan/review-list";
+import { CraftJourneyTimeline } from "@/components/store/craft-journey-timeline";
+import { CraftJourneyStage, SupplyChainLink, ProductType } from "@/lib/types";
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api/v1";
@@ -17,6 +19,11 @@ interface FullProduct extends StorefrontProduct {
   description: string;
   giCertUrl: string | null;
   giCertPublicId: string | null;
+  productType: ProductType;
+  productionStage: string | null;
+  supplierType: string;
+  craftJourney?: CraftJourneyStage[];
+  supplyChainOutput?: SupplyChainLink[];
   attributes: Array<{
     id: string;
     key: string;
@@ -429,6 +436,63 @@ export default async function ProductDetailPage({
           />
         </section>
       )}
+
+      {/* ── Craft Journey Timeline (finished products only) ──────────── */}
+      {product.productType === "FINISHED" &&
+        product.craftJourney &&
+        product.craftJourney.length > 0 && (
+          <section className="border-t border-[#e8e6e3] bg-white">
+            <CraftJourneyTimeline stages={product.craftJourney} />
+          </section>
+        )}
+
+      {/* ── Used In Products (raw / semi-finished products) ──────────── */}
+      {(product.productType === "RAW" || product.productType === "SEMI_FINISHED") &&
+        product.supplyChainOutput &&
+        product.supplyChainOutput.length > 0 && (
+          <section className="border-t border-[#e8e6e3]">
+            <div className="max-w-[900px] mx-auto px-6 py-16 md:py-20">
+              <p className="text-[9px] tracking-[0.4em] text-[#9a9a9a] uppercase mb-10 text-center">
+                Used In Finished Products
+              </p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                {product.supplyChainOutput.map((link) => {
+                  const fp = link.finishedProduct;
+                  const img = fp.images?.[0]?.secureUrl;
+                  return (
+                    <Link
+                      key={fp.id}
+                      href={`/shop/product/${fp.id}`}
+                      className="group"
+                    >
+                      <div className="relative w-full aspect-[3/4] bg-[#f5f4f0] overflow-hidden mb-3">
+                        {img ? (
+                          <Image
+                            src={img}
+                            alt={fp.title}
+                            fill
+                            sizes="(max-width: 768px) 50vw, 25vw"
+                            className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 bg-[#f5f4f0]" />
+                        )}
+                      </div>
+                      <p className="text-[11px] tracking-[0.06em] text-[#0a0a0a] leading-snug group-hover:opacity-60 transition-opacity">
+                        {fp.title}
+                      </p>
+                      {fp.artisan?.shop?.shopName && (
+                        <p className="text-[9px] tracking-[0.08em] text-[#9a9a9a] mt-1">
+                          {fp.artisan.shop.shopName}
+                        </p>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+        )}
 
       {/* ── Authenticity Chain — Centered certification display ────── */}
       <section className="bg-[#faf9f7]">

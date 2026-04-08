@@ -9,9 +9,15 @@ import { StarDisplay } from "@/components/store/star-display";
 const API_BASE =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api/v1";
 
+export type ProductType = "FINISHED" | "RAW" | "SEMI_FINISHED";
+export type ProductionStage = "WOOL_COLLECTION" | "CLEANING" | "SPINNING" | "WEAVING" | "DYEING" | "EMBROIDERY" | "FINISHING" | "OTHER";
+
 export interface StorefrontProduct {
   id: string;
   title: string;
+  productType?: ProductType;
+  productionStage?: ProductionStage | null;
+  supplierType?: string;
   isMadeToOrder: boolean;
   leadTimeDays: number | null;
   images: Array<{
@@ -58,6 +64,8 @@ async function fetchStorefrontProducts(params: {
   trustTier?: string;
   sort?: string;
   order?: string;
+  productType?: string;
+  productionStage?: string;
 }): Promise<ProductsResponse> {
   const qs = new URLSearchParams();
   if (params.categoryId) qs.set("categoryId", params.categoryId);
@@ -65,6 +73,8 @@ async function fetchStorefrontProducts(params: {
   if (params.trustTier) qs.set("trustTier", params.trustTier);
   if (params.sort) qs.set("sort", params.sort);
   if (params.order) qs.set("order", params.order);
+  if (params.productType) qs.set("productType", params.productType);
+  if (params.productionStage) qs.set("productionStage", params.productionStage);
   qs.set("page", String(params.page));
   qs.set("limit", String(params.limit));
 
@@ -127,6 +137,16 @@ function ProductCard({ product }: { product: StorefrontProduct }) {
             MADE TO ORDER
           </span>
         )}
+        {product.productType === "RAW" && (
+          <span className="absolute top-2.5 right-2.5 text-[7px] tracking-[0.15em] bg-[#e8f4e8] text-[#3a7a3a] px-2 py-0.5">
+            RAW MATERIAL
+          </span>
+        )}
+        {product.productType === "SEMI_FINISHED" && (
+          <span className="absolute top-2.5 right-2.5 text-[7px] tracking-[0.15em] bg-[#f4eee8] text-[#7a5a3a] px-2 py-0.5">
+            SEMI-FINISHED
+          </span>
+        )}
       </div>
 
       {/* Info */}
@@ -184,11 +204,13 @@ interface ProductGridProps {
   trustTier?: string;
   sort?: string;
   order?: string;
+  productType?: string;
+  productionStage?: string;
 }
 
 const PAGE_SIZE = 12;
 
-export default function ProductGrid({ categoryId, subcategoryId, trustTier, sort, order }: ProductGridProps) {
+export default function ProductGrid({ categoryId, subcategoryId, trustTier, sort, order, productType, productionStage }: ProductGridProps) {
   const [products, setProducts] = useState<StorefrontProduct[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -206,6 +228,8 @@ export default function ProductGrid({ categoryId, subcategoryId, trustTier, sort
         trustTier,
         sort,
         order,
+        productType,
+        productionStage,
         page: pageNum,
         limit: PAGE_SIZE,
       });
@@ -219,7 +243,7 @@ export default function ProductGrid({ categoryId, subcategoryId, trustTier, sort
       if (replace) setLoading(false);
       else setLoadingMore(false);
     },
-    [categoryId, subcategoryId, trustTier, sort, order]
+    [categoryId, subcategoryId, trustTier, sort, order, productType, productionStage]
   );
 
   useEffect(() => {
